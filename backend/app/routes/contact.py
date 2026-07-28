@@ -2,8 +2,8 @@ import re
 
 from flask import Blueprint, jsonify, request
 
-from portfolio.backend.app.extensions import db
-from portfolio.backend.app.models import ContactMessage
+from app.extensions import db
+from app.models import ContactMessage
 
 contact_bp = Blueprint("contact", __name__)
 

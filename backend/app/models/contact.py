@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from portfolio.backend.app.extensions import db
+from app.extensions import db
 
 
 class ContactMessage(db.Model):
