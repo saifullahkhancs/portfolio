@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# System deps for psycopg2
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Cloud Run injects $PORT; default to 8080 for local docker run
+ENV PORT=8080
+EXPOSE 8080
+
+CMD exec gunicorn --bind :$PORT --workers 2 --threads 4 --timeout 0 wsgi:app
