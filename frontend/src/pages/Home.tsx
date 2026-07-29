@@ -4,7 +4,7 @@ import { profile, skills, experience, projects, education, certifications, asset
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
 import { ProjectIcons } from "@/components/ProjectIcons";
-import IDCard from "@/components/IDCard";
+import { HangingCardAnimation } from "@/components/HangingCardAnimation";
 
 const certImages: Record<string, string> = {
   javascript: assets.certJavascript,
@@ -57,7 +57,14 @@ export default function Home() {
           </div>
 
           <div className="animate-fade-up justify-self-start md:justify-self-end" style={{ animationDelay: "160ms" }}>
-            <IDCard />
+            <div className="relative h-48 w-48 overflow-hidden rounded-2xl border border-primary/40 bg-secondary shadow-[0_0_60px_-15px_var(--color-primary)] transition-transform duration-500 hover:scale-[1.03] sm:h-60 sm:w-60">
+              <img
+                src={assets.portrait}
+                alt="Portrait of Saifullah Khan"
+                className="h-full w-full object-cover object-top"
+              />
+            </div>
+            <HangingCardAnimation />
           </div>
         </div>
 
