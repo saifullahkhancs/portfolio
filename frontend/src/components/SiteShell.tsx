@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
-import { profile, assets } from "@/data/portfolio";
+import { profile as staticProfile, assets as staticAssets } from "@/data/portfolio";
+import type { Profile } from "@/lib/api";
 
 const nav = [
   { to: "/", label: "home" },
@@ -9,7 +10,17 @@ const nav = [
   { to: "/contact", label: "contact" },
 ] as const;
 
-export function SiteShell({ children }: { children: ReactNode }) {
+export function SiteShell({ children, profile }: { children: ReactNode; profile?: Profile | null }) {
+  const p = profile || {
+    name: staticProfile.name,
+    location: staticProfile.location,
+    github: staticProfile.github,
+    linkedin: staticProfile.linkedin,
+    resume_url: staticAssets.resume,
+  } as any;
+
+  const resumeUrl = (p.resume_url as string) || staticAssets.resume || (p as any).resumeUrl;
+
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
@@ -32,6 +43,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 {item.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/dashboard"
+              className="ml-2 rounded-md border border-primary/30 px-2.5 py-1.5 text-primary hover:bg-primary/10"
+            >
+              dashboard
+            </NavLink>
           </nav>
         </div>
       </header>
@@ -41,16 +58,16 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <footer className="mt-24 border-t border-border">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-8 font-mono text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} {profile.name} — {profile.location}
+            © {new Date().getFullYear()} {p.name} — {p.location}
           </p>
           <div className="flex gap-4">
-            <a className="transition-colors hover:text-primary" href={profile.github} target="_blank" rel="noreferrer">
+            <a className="transition-colors hover:text-primary" href={p.github} target="_blank" rel="noreferrer">
               GitHub
             </a>
-            <a className="transition-colors hover:text-primary" href={profile.linkedin} target="_blank" rel="noreferrer">
+            <a className="transition-colors hover:text-primary" href={p.linkedin} target="_blank" rel="noreferrer">
               LinkedIn
             </a>
-            <a className="transition-colors hover:text-primary" href={assets.resume} target="_blank" rel="noreferrer">
+            <a className="transition-colors hover:text-primary" href={resumeUrl} target="_blank" rel="noreferrer">
               Résumé
             </a>
           </div>

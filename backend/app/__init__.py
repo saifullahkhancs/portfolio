@@ -19,7 +19,7 @@ def create_app(config_object: str | None = None) -> Flask:
     # "https://your-app.vercel.app,https://yourdomain.com"
     allowed_origins = [
         origin.strip()
-        for origin in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+        for origin in os.environ.get("ALLOWED_ORIGINS", "http://localhost:6175,http://localhost:5175,http://localhost:5173").split(",")
         if origin.strip()
     ]
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
@@ -31,11 +31,22 @@ def create_app(config_object: str | None = None) -> Flask:
     from .routes.health import health_bp
     from .routes.auth import auth_bp
     from .routes.admin import admin_bp
+    from .routes.portfolio_data import portfolio_bp
 
     app.register_blueprint(health_bp)
     app.register_blueprint(contact_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(portfolio_bp)
+
+    # Ensure tables visible even without migrations (useful for Supabase)
+    # Will not overwrite existing tables
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception:
+            # don't crash on startup if DB not reachable
+            pass
 
     return app
 

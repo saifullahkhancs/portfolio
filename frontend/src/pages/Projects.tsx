@@ -1,17 +1,29 @@
+import { useEffect, useState } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
-import { projects } from "@/data/portfolio";
+import { projects as staticProjects } from "@/data/portfolio";
 import { ProjectIcons } from "@/components/ProjectIcons";
+import { getProjects, getProfile, type Project } from "@/lib/api";
 
 export default function Projects() {
+  const [projects, setProjects] = useState<Project[] | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    getProjects().then(setProjects).catch(() => {});
+    getProfile().then(setProfile).catch(() => {});
+  }, []);
+
+  const list = projects?.length ? projects : (staticProjects as unknown as Project[]);
+
   return (
-    <SiteShell>
+    <SiteShell profile={profile}>
       <PageHeader
         kicker="Build log"
         title="Projects"
         intro="Automation platforms, ingestion pipelines and full-stack products — mostly Python on the backend, React where a UI is needed."
       />
       <div className="mx-auto grid max-w-5xl gap-4 px-6 py-16 sm:grid-cols-2">
-        {projects.map((p) => (
+        {list.map((p: any) => (
           <article key={p.name} className="panel flex flex-col p-6">
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-xl font-semibold">{p.name}</h2>
@@ -20,9 +32,22 @@ export default function Projects() {
             <p className="mt-1 font-mono text-xs text-primary">{p.tagline}</p>
             <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
             <ProjectIcons name={p.name} />
-            {((p as any).projectUrl || (p as any).videoUrl) && <div className="mt-5 flex gap-4 font-mono text-xs text-primary">{(p as any).projectUrl && <a href={(p as any).projectUrl} target="_blank" rel="noreferrer">live project ↗</a>}{(p as any).videoUrl && <a href={(p as any).videoUrl} target="_blank" rel="noreferrer">watch demo ▶</a>}</div>}
+            {(p.project_url || p.projectUrl || p.video_url || p.videoUrl) && (
+              <div className="mt-5 flex gap-4 font-mono text-xs text-primary">
+                {(p.project_url || p.projectUrl) && (
+                  <a href={p.project_url || p.projectUrl} target="_blank" rel="noreferrer">
+                    live project ↗
+                  </a>
+                )}
+                {(p.video_url || p.videoUrl) && (
+                  <a href={p.video_url || p.videoUrl} target="_blank" rel="noreferrer">
+                    watch demo ▶
+                  </a>
+                )}
+              </div>
+            )}
             <ul className="mt-5 flex flex-wrap gap-2">
-              {p.stack.map((s) => (
+              {(p.stack || []).map((s: string) => (
                 <li key={s} className="rounded-md bg-secondary px-2.5 py-1 font-mono text-xs text-secondary-foreground">
                   {s}
                 </li>

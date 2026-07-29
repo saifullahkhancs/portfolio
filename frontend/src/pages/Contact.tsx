@@ -1,21 +1,36 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
-import { profile, assets } from "@/data/portfolio";
-import { submitContactForm } from "@/lib/api";
-
-const links = [
-  { label: "Email", value: profile.email, href: `mailto:${profile.email}` },
-  { label: "Phone", value: profile.phone, href: `tel:${profile.phone}` },
-  { label: "LinkedIn", value: "saifullah-khan", href: profile.linkedin },
-  { label: "GitHub", value: "saifullahkhancs", href: profile.github },
-];
+import { profile as staticProfile, assets as staticAssets } from "@/data/portfolio";
+import { submitContactForm, getProfile, type Profile } from "@/lib/api";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 export default function Contact() {
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getProfile().then(setProfile).catch(() => {});
+  }, []);
+
+  const p = profile || {
+    name: staticProfile.name,
+    email: staticProfile.email,
+    phone: staticProfile.phone,
+    linkedin: staticProfile.linkedin,
+    github: staticProfile.github,
+    location: staticProfile.location,
+    resume_url: staticAssets.resume,
+  } as any;
+
+  const links = [
+    { label: "Email", value: p.email, href: `mailto:${p.email}` },
+    { label: "Phone", value: p.phone, href: `tel:${p.phone}` },
+    { label: "LinkedIn", value: "saifullah-khan", href: p.linkedin },
+    { label: "GitHub", value: "saifullahkhancs", href: p.github },
+  ];
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -32,7 +47,7 @@ export default function Contact() {
   }
 
   return (
-    <SiteShell>
+    <SiteShell profile={profile}>
       <PageHeader
         kicker="Say hello"
         title="Contact"
@@ -60,7 +75,7 @@ export default function Contact() {
             <p className="mt-2 font-mono text-sm">Full PDF résumé, always up to date.</p>
           </div>
           <a
-            href={assets.resume}
+            href={p.resume_url || staticAssets.resume}
             target="_blank"
             rel="noreferrer"
             className="rounded-md bg-primary px-5 py-2.5 font-mono text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"

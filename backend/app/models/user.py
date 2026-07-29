@@ -25,5 +25,20 @@ class Project(db.Model):
     stack = db.Column(db.JSON, nullable=False, default=list)
     project_url = db.Column(db.String(500), nullable=False, default="")
     video_url = db.Column(db.String(500), nullable=False, default="")
+    featured = db.Column(db.Boolean, nullable=False, default=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
     def to_dict(self):
-        return {k: getattr(self, k) for k in ("id","name","tagline","period","description","stack","project_url","video_url")}
+        return {
+            "id": self.id,
+            "name": self.name,
+            "tagline": self.tagline,
+            "period": self.period,
+            "description": self.description,
+            "stack": self.stack or [],
+            "project_url": self.project_url,
+            "projectUrl": self.project_url,
+            "video_url": self.video_url,
+            "videoUrl": self.video_url,
+            "featured": self.featured,
+            "sort_order": self.sort_order,
+        }
