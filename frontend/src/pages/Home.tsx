@@ -1,23 +1,61 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SiteShell } from "@/components/SiteShell";
-import { profile, skills, experience, projects, education, certifications, assets } from "@/data/portfolio";
+import { profile as staticProfile, skills as staticSkills, experience as staticExp, projects as staticProjects, education as staticEdu, certifications as staticCerts, assets as staticAssets } from "@/data/portfolio";
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
 import { ProjectIcons } from "@/components/ProjectIcons";
-import { HangingCardAnimation } from "@/components/HangingCardAnimation";
+import IDCard from "@/components/IDCard";
+import { getPortfolio, type PortfolioData } from "@/lib/api";
 
 const certImages: Record<string, string> = {
-  javascript: assets.certJavascript,
-  azure: assets.certAzure,
-  hackerrank: assets.certHackerrank,
+  javascript: staticAssets.certJavascript,
+  azure: staticAssets.certAzure,
+  hackerrank: staticAssets.certHackerrank,
 };
 
 export default function Home() {
+  const [data, setData] = useState<PortfolioData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getPortfolio()
+      .then(setData)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  // fallbacks
+  const profile = data?.profile || {
+    name: staticProfile.name,
+    title: staticProfile.role,
+    role: staticProfile.role,
+    description: staticProfile.summary,
+    summary: staticProfile.summary,
+    email: staticProfile.email,
+    phone: staticProfile.phone,
+    location: staticProfile.location,
+    linkedin: staticProfile.linkedin,
+    github: staticProfile.github,
+    profile_image_url: staticAssets.portrait,
+    hero_banner_url: staticAssets.heroBanner,
+    resume_url: staticAssets.resume,
+  } as any;
+
+  const skills = (data?.skills && data.skills.length ? data.skills : staticSkills.map((s: any, i: number) => ({ id: i, group: s.group, group_name: s.group, items: s.items, sort_order: i }))) as any[];
+  const experience = data?.experiences?.length ? data.experiences : staticExp;
+  const projects = data?.projects?.length ? data.projects : staticProjects;
+  const education = (data?.education || data?.educations?.[0] || staticEdu) as any;
+  const certifications = data?.certifications?.length ? data.certifications : staticCerts;
+
+  const heroBanner = (profile.hero_banner_url as string) || staticAssets.heroBanner;
+  const resumeUrl = (profile.resume_url as string) || staticAssets.resume;
+
   return (
-    <SiteShell>
+    <SiteShell profile={profile}>
       <section className="relative overflow-hidden border-b border-border">
         <img
-          src={assets.heroBanner}
+          src={heroBanner}
           alt=""
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
@@ -31,13 +69,13 @@ export default function Home() {
           }}
         />
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-5xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[1.5fr_auto]">
+        <div className="relative mx-auto grid max-w-5xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[1.6fr_auto]">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary animate-fade-up" style={{ animationDelay: '0ms' }}>{profile.role}</p>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary animate-fade-up" style={{ animationDelay: '0ms' }}>{profile.title || profile.role}</p>
             <h1 className="mt-5 text-5xl font-bold leading-[1.05] sm:text-6xl animate-fade-up" style={{ animationDelay: '100ms' }}>
-              {profile.name.split(" ")[0]} <span className="text-gradient">{profile.name.split(" ")[1]}</span>
+              {(profile.name || "").split(" ")[0]} <span className="text-gradient">{(profile.name || "").split(" ").slice(1).join(" ")}</span>
             </h1>
-            <p className="mt-6 max-w-2xl leading-relaxed text-muted-foreground animate-fade-up" style={{ animationDelay: '200ms' }}>{profile.summary}</p>
+            <p className="mt-6 max-w-2xl leading-relaxed text-muted-foreground animate-fade-up" style={{ animationDelay: '200ms' }}>{profile.description || profile.summary}</p>
             <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: '300ms' }}>
               <Link
                 to="/projects"
@@ -46,25 +84,19 @@ export default function Home() {
                 View projects
               </Link>
               <a
-                href={assets.resume}
+                href={resumeUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-md border border-border bg-background/60 px-5 py-2.5 font-medium backdrop-blur transition-colors hover:bg-secondary"
               >
                 Download résumé
               </a>
+              {loading && <span className="ml-2 self-center text-xs text-muted-foreground">syncing from backend…</span>}
             </div>
           </div>
 
-          <div className="animate-fade-up justify-self-start md:justify-self-end" style={{ animationDelay: "160ms" }}>
-            <div className="relative h-48 w-48 overflow-hidden rounded-2xl border border-primary/40 bg-secondary shadow-[0_0_60px_-15px_var(--color-primary)] transition-transform duration-500 hover:scale-[1.03] sm:h-60 sm:w-60">
-              <img
-                src={assets.portrait}
-                alt="Portrait of Saifullah Khan"
-                className="h-full w-full object-cover object-top"
-              />
-            </div>
-            <HangingCardAnimation />
+          <div className="animate-fade-up justify-self-center md:justify-self-end" style={{ animationDelay: "160ms" }}>
+            <IDCard profile={profile} />
           </div>
         </div>
 
@@ -89,14 +121,14 @@ export default function Home() {
           <h2 className="text-2xl font-bold">Technical stack</h2>
         </Reveal>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {skills.map((group, i) => (
-            <Reveal key={group.group} delay={i * 70}>
+          {skills.map((group: any, i: number) => (
+            <Reveal key={group.group || group.group_name} delay={i * 70}>
               <div className="skill-card panel relative h-full overflow-hidden p-5 transition-colors duration-300 hover:border-primary/50">
-                <SkillBackdrop group={group.group} />
+                <SkillBackdrop group={group.group || group.group_name} />
                 <div className="relative">
-                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{group.group}</h3>
+                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{group.group || group.group_name}</h3>
                   <ul className="mt-3 flex flex-wrap gap-2">
-                    {group.items.map((item) => (
+                    {(group.items || []).map((item: string) => (
                       <li
                         key={item}
                         className="rounded-md bg-secondary px-2.5 py-1 font-mono text-xs text-secondary-foreground transition-colors hover:bg-primary/15 hover:text-primary"
@@ -122,7 +154,7 @@ export default function Home() {
           </div>
         </Reveal>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {projects.slice(0, 2).map((p, i) => (
+          {projects.slice(0, 2).map((p: any, i: number) => (
             <Reveal key={p.name} delay={i * 110}>
               <article className="panel h-full p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50">
                 <h3 className="text-lg font-semibold">{p.name}</h3>
@@ -146,12 +178,12 @@ export default function Home() {
         </Reveal>
         <Reveal delay={90}>
           <div className="panel mt-8 p-6">
-            <p className="font-mono text-xs text-muted-foreground">{experience[0].period}</p>
+            <p className="font-mono text-xs text-muted-foreground">{(experience[0] as any).period}</p>
             <h3 className="mt-2 text-lg font-semibold">
-              {experience[0].role} · <span className="text-primary">{experience[0].company}</span>
+              {(experience[0] as any).role} · <span className="text-primary">{(experience[0] as any).company}</span>
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              {experience[0].points.slice(0, 3).map((pt) => (
+              {((experience[0] as any).points || []).slice(0, 3).map((pt: string) => (
                 <li key={pt} className="flex gap-3">
                   <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
                   {pt}
@@ -167,26 +199,34 @@ export default function Home() {
           <h2 className="text-2xl font-bold">Certifications</h2>
         </Reveal>
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {certifications.map((c, i) => (
-            <Reveal key={c.name} delay={i * 110}>
-              <article className="panel group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_0_40px_-18px_var(--color-primary)]">
-                <div className="overflow-hidden border-b border-border bg-secondary">
-                  <img
-                    src={certImages[c.image]}
-                    alt={`${c.name} certificate issued by ${c.issuer}`}
-                    loading="lazy"
-                    className="h-40 w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-5">
-                  <p className="font-mono text-xs text-muted-foreground">{c.year}</p>
-                  <h3 className="mt-2 text-base font-semibold leading-snug">{c.name}</h3>
-                  <p className="font-mono text-sm text-primary">{c.issuer}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.detail}</p>
-                </div>
-              </article>
-            </Reveal>
-          ))}
+          {certifications.map((c: any, i: number) => {
+            const imgKey = c.image_key || c.image || "";
+            const imgUrl = c.image_url || certImages[imgKey] || "";
+            return (
+              <Reveal key={c.name} delay={i * 110}>
+                <article className="panel group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_0_40px_-18px_var(--color-primary)]">
+                  <div className="overflow-hidden border-b border-border bg-secondary">
+                    {imgUrl ? (
+                      <img
+                        src={imgUrl}
+                        alt={`${c.name} certificate issued by ${c.issuer}`}
+                        loading="lazy"
+                        className="h-40 w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="h-40 w-full bg-secondary" />
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <p className="font-mono text-xs text-muted-foreground">{c.year}</p>
+                    <h3 className="mt-2 text-base font-semibold leading-snug">{c.name}</h3>
+                    <p className="font-mono text-sm text-primary">{c.issuer}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.detail}</p>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
         </div>
       </section>
 

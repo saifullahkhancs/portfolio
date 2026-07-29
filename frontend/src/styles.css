@@ -161,12 +161,29 @@
 }
 
 @keyframes sway {
-  0%,
-  100% {
-    transform: rotate(-3deg);
+  0% {
+    transform: translate(-50%, 26px) rotate(-4deg);
+  }
+  25% {
+    transform: translate(-50%, 26px) rotate(4deg);
   }
   50% {
-    transform: rotate(3deg);
+    transform: translate(-50%, 26px) rotate(-2.5deg);
+  }
+  75% {
+    transform: translate(-50%, 26px) rotate(2deg);
+  }
+  100% {
+    transform: translate(-50%, 26px) rotate(0deg);
+  }
+}
+
+@keyframes sway-idle {
+  0%, 100% {
+    transform: translate(-50%, 26px) rotate(-1.2deg);
+  }
+  50% {
+    transform: translate(-50%, 26px) rotate(1.2deg);
   }
 }
 
@@ -187,34 +204,47 @@
 }
 
 @keyframes flutter {
-  0%,
-  100% {
-    transform: translateX(-50%) rotate(-5deg) translateX(-30px);
+  0%, 100% {
+    transform: translateX(-50%) rotate(-16deg) translateX(-34px) translateY(0);
   }
   25% {
-    transform: translateX(-50%) rotate(-8deg) translateX(-35px);
+    transform: translateX(-50%) rotate(-10deg) translateX(-36px) translateY(1px);
   }
   50% {
-    transform: translateX(-50%) rotate(-3deg) translateX(-25px);
+    transform: translateX(-50%) rotate(-18deg) translateX(-32px) translateY(-1px);
   }
   75% {
-    transform: translateX(-50%) rotate(-6deg) translateX(-32px);
+    transform: translateX(-50%) rotate(-12deg) translateX(-35px) translateY(0.5px);
   }
 }
 
 @keyframes flutter-right {
-  0%,
-  100% {
-    transform: translateX(-50%) rotate(5deg) translateX(30px);
+  0%, 100% {
+    transform: translateX(-50%) rotate(16deg) translateX(34px) translateY(0);
   }
   25% {
-    transform: translateX(-50%) rotate(8deg) translateX(35px);
+    transform: translateX(-50%) rotate(10deg) translateX(36px) translateY(1px);
   }
   50% {
-    transform: translateX(-50%) rotate(3deg) translateX(25px);
+    transform: translateX(-50%) rotate(18deg) translateX(32px) translateY(-1px);
   }
   75% {
-    transform: translateX(-50%) rotate(6deg) translateX(32px);
+    transform: translateX(-50%) rotate(12deg) translateX(35px) translateY(0.5px);
+  }
+}
+
+@keyframes impact {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  20% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.6);
   }
 }
 
@@ -231,8 +261,8 @@
 }
 
 @utility animate-sway {
-  animation: sway 2s ease-in-out 3;
-  animation-fill-mode: forwards;
+  animation: sway-idle 3.2s ease-in-out infinite;
+  transform-origin: top center;
 }
 
 @utility animate-wave {
@@ -240,11 +270,11 @@
 }
 
 @utility animate-flutter {
-  animation: flutter 0.3s ease-in-out infinite;
+  animation: flutter 0.28s ease-in-out infinite;
 }
 
 @utility animate-flutter-right {
-  animation: flutter-right 0.3s ease-in-out infinite;
+  animation: flutter-right 0.28s ease-in-out infinite;
 }
 
 @utility skill-backdrop {
@@ -293,32 +323,14 @@
   }
 }
 
-/* The hanging card: a slow, readable three-stage loop (fall -> impact -> settle). */
-.hanging-scene {
-  --scene-width: 15rem;
-  position: relative;
-  width: var(--scene-width);
-  height: 13rem;
-  margin-top: 1rem;
-  overflow: hidden;
-  border: 1px solid color-mix(in oklab, var(--primary) 28%, var(--border));
-  border-radius: 1rem;
-  background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--glow) 12%, transparent), transparent 65%), var(--background);
+/* Legacy hanging-scene kept for backward compat but new IDCard uses inline styles + sway-idle */
+.hanging-scene { display: none; }
+
+/* new utility for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-sway,
+  .animate-flutter,
+  .animate-flutter-right {
+    animation: none !important;
+  }
 }
-.hanging-scene::before { content: ""; position: absolute; inset: 0; opacity: .35; background-image: linear-gradient(color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px); background-size: 1.25rem 1.25rem; }
-.nail { position: absolute; z-index: 4; left: 50%; top: 1.1rem; width: 2.4rem; height: 2rem; transform: translateX(-50%); }
-.nail-head { position: absolute; left: .35rem; top: 0; width: 1.7rem; height: .48rem; border-radius: 50%; background: var(--primary); box-shadow: 0 0 14px color-mix(in oklab, var(--primary) 60%, transparent); }
-.nail-shaft { position: absolute; left: 1.05rem; top: .35rem; width: .28rem; height: 1.6rem; border-radius: 0 0 .2rem .2rem; background: linear-gradient(90deg, var(--border), var(--foreground), var(--border)); transform: rotate(12deg); transform-origin: top; }
-.suspension { position: absolute; inset: 0; z-index: 2; animation: card-drop 9s cubic-bezier(.2,.8,.2,1) infinite; }
-.strip { position: absolute; top: 2.7rem; width: .16rem; height: 5.3rem; transform-origin: top center; background: linear-gradient(var(--primary), color-mix(in oklab, var(--primary) 30%, var(--glow))); box-shadow: 0 0 8px color-mix(in oklab, var(--primary) 45%, transparent); }
-.strip-left { left: 3.45rem; animation: rope-left 9s ease-in-out infinite; }
-.strip-right { right: 3.45rem; animation: rope-right 9s ease-in-out infinite; }
-.hanging-card { position: absolute; left: 50%; top: 7.5rem; display: flex; width: 8.2rem; height: 4rem; transform: translateX(-50%); flex-direction: column; justify-content: center; border: 1px solid var(--primary); border-radius: .5rem; background: var(--surface); text-align: center; box-shadow: 0 10px 25px #0008; }
-.hanging-card b { color: var(--primary); font: 700 .9rem var(--font-mono); letter-spacing: .2em; }
-.hanging-card small { margin-top: .25rem; color: var(--muted-foreground); font: .65rem var(--font-mono); }
-.impact-ring { position: absolute; z-index: 1; left: 50%; top: 1.35rem; width: 1rem; height: 1rem; border: 1px solid var(--primary); border-radius: 50%; transform: translate(-50%,-50%); animation: impact 9s ease-out infinite; }
-@keyframes card-drop { 0%, 18% { transform: translateY(-5.5rem); } 42% { transform: translateY(0); } 48% { transform: translateY(.25rem); } 57% { transform: translateY(-.08rem) rotate(5deg); } 67% { transform: translateY(0) rotate(-3deg); } 80%, 100% { transform: translateY(0) rotate(0); } }
-@keyframes rope-left { 0%,18% { transform: rotate(16deg); } 35% { transform: rotate(-13deg); } 48% { transform: rotate(3deg); } 67%,100% { transform: rotate(0); } }
-@keyframes rope-right { 0%,18% { transform: rotate(-12deg); } 35% { transform: rotate(15deg); } 48% { transform: rotate(-3deg); } 67%,100% { transform: rotate(0); } }
-@keyframes impact { 0%, 39% { opacity: 0; transform: translate(-50%,-50%) scale(.3); } 44% { opacity: .8; transform: translate(-50%,-50%) scale(1); } 60%,100% { opacity: 0; transform: translate(-50%,-50%) scale(2.8); } }
-@media (prefers-reduced-motion: reduce) { .suspension, .strip-left, .strip-right, .impact-ring { animation: none; } .suspension { transform: none; } .strip-left, .strip-right { transform: rotate(0); } .impact-ring { opacity: .5; transform: translate(-50%,-50%); } }
