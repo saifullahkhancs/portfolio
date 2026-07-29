@@ -54,21 +54,21 @@ Tables immediately visible in Supabase Table Editor.
 ## Running locally
 
 ```bash
-# backend
+# backend — runs on 5175
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # set DATABASE_URL=sqlite:///dev.db and SECRET_KEY
 python create_admin.py admin@example.com strongpass
 python seed.py --reset
-python wsgi.py           # http://localhost:5000
+python wsgi.py           # http://localhost:5175
 
-# frontend
+# frontend — runs on 6175
 cd ../frontend
 npm install
-cp .env.example .env    # VITE_API_URL=http://localhost:5000
-npm run dev              # http://localhost:5173
-# login at http://localhost:5173/signin -> /dashboard to edit
+cp .env.example .env    # VITE_API_URL=http://localhost:5175
+npm run dev              # http://localhost:6175
+# login at http://localhost:6175/signin -> /dashboard to edit
 ```
 
 ## Deploying

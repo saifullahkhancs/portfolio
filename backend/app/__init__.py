@@ -19,7 +19,7 @@ def create_app(config_object: str | None = None) -> Flask:
     # "https://your-app.vercel.app,https://yourdomain.com"
     allowed_origins = [
         origin.strip()
-        for origin in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+        for origin in os.environ.get("ALLOWED_ORIGINS", "http://localhost:6175,http://localhost:5175,http://localhost:5173").split(",")
         if origin.strip()
     ]
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}})

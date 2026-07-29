@@ -4,9 +4,14 @@
 
 ```bash
 npm install
-cp .env.example .env   # set VITE_API_URL to your Flask backend
-npm run dev             # http://localhost:5173
+cp .env.example .env   # set VITE_API_URL to your Flask backend (http://localhost:5175)
+npm run dev             # http://localhost:6175  (frontend), backend on 5175
 ```
+
+- Frontend dev server: **http://localhost:6175**
+- Backend API: **http://localhost:5175**
+
+If port 6175 is busy, Vite will fallback if `strictPort` is false, but config sets `strictPort: true` so free the port.
 
 ## Deploying to Vercel
 
@@ -22,9 +27,7 @@ vercel --prod
 ### Option B — Dashboard
 
 1. Push this repo to GitHub
-2. Import the `frontend/` directory as a new Vercel project (set **Root
-   Directory** to `frontend` if the repo contains both `frontend/` and
-   `backend/`)
+2. Import the `frontend/` directory as a new Vercel project (set **Root Directory** to `frontend` if the repo contains both `frontend/` and `backend/`)
 3. Framework preset: **Vite**
 4. Add an environment variable: `VITE_API_URL` = your deployed Flask API URL
    (e.g. `https://portfolio-api-xxxxx-uc.a.run.app`)
