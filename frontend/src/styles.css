@@ -160,6 +160,64 @@
   }
 }
 
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: translateX(-50%) scaleY(1);
+  }
+  25% {
+    transform: translateX(-50%) scaleY(1.1);
+  }
+  50% {
+    transform: translateX(-50%) scaleY(0.95);
+  }
+  75% {
+    transform: translateX(-50%) scaleY(1.05);
+  }
+}
+
+@keyframes flutter {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(-5deg) translateX(-30px);
+  }
+  25% {
+    transform: translateX(-50%) rotate(-8deg) translateX(-35px);
+  }
+  50% {
+    transform: translateX(-50%) rotate(-3deg) translateX(-25px);
+  }
+  75% {
+    transform: translateX(-50%) rotate(-6deg) translateX(-32px);
+  }
+}
+
+@keyframes flutter-right {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(5deg) translateX(30px);
+  }
+  25% {
+    transform: translateX(-50%) rotate(8deg) translateX(35px);
+  }
+  50% {
+    transform: translateX(-50%) rotate(3deg) translateX(25px);
+  }
+  75% {
+    transform: translateX(-50%) rotate(6deg) translateX(32px);
+  }
+}
+
 @utility animate-code-scroll {
   animation: code-scroll 14s linear infinite;
 }
@@ -172,6 +230,23 @@
   animation: node-pulse 2.2s ease-in-out infinite;
 }
 
+@utility animate-sway {
+  animation: sway 2s ease-in-out 3;
+  animation-fill-mode: forwards;
+}
+
+@utility animate-wave {
+  animation: wave 0.5s ease-in-out infinite;
+}
+
+@utility animate-flutter {
+  animation: flutter 0.3s ease-in-out infinite;
+}
+
+@utility animate-flutter-right {
+  animation: flutter-right 0.3s ease-in-out infinite;
+}
+
 @utility skill-backdrop {
   position: absolute;
   inset: 0;
@@ -180,6 +255,7 @@
   opacity: 0.12;
   transition: opacity 0.4s ease;
   mask-image: linear-gradient(to bottom, transparent, black 25%, black 70%, transparent);
+  transform: translateX(20px);
 }
 
 @utility reveal {

@@ -1,4 +1,4 @@
-import { Boxes, Database, Lock, Mail, MessageSquare, Server, Shield, Workflow } from "lucide-react";
+import { Boxes, Database, Lock, Mail, MessageSquare, Server, Shield, Workflow, Package, Cloud, Zap } from "lucide-react";
 
 const codeSnippets: Record<string, string[]> = {
   "Programming Languages": [
@@ -111,11 +111,34 @@ function ShieldFlow() {
   );
 }
 
+function DockerKubernetesFlow() {
+  return (
+    <div className="skill-backdrop flex items-center justify-center gap-4 text-primary">
+      <div className="flex flex-col items-center gap-1">
+        <Package size={16} className="animate-node-pulse" />
+        <span className="font-mono text-[0.5rem] text-accent">Code</span>
+      </div>
+      <div className="h-px w-8 bg-primary/40" />
+      <div className="flex flex-col items-center gap-1">
+        <Package size={16} className="animate-node-pulse" style={{ animationDelay: "0.3s" }} />
+        <span className="font-mono text-[0.5rem] text-accent">Docker</span>
+      </div>
+      <div className="h-px w-8 bg-primary/40" />
+      <div className="flex flex-col items-center gap-1">
+        <Cloud size={16} className="animate-node-pulse" style={{ animationDelay: "0.6s" }} />
+        <Zap size={12} className="absolute -mt-2 animate-node-pulse text-accent" style={{ animationDelay: "0.8s" }} />
+        <span className="font-mono text-[0.5rem] text-accent">K8s/Azure</span>
+      </div>
+    </div>
+  );
+}
+
 export function SkillBackdrop({ group }: { group: string }) {
   if (codeSnippets[group]) return <CodeRain lines={codeSnippets[group]} />;
   if (group === "Databases") return <RowFlow />;
   if (group === "Messaging & Realtime") return <MessageFlow />;
   if (group === "Architecture") return <NodeMesh icon={Workflow} />;
   if (group === "Auth & Security") return <ShieldFlow />;
+  if (group === "Familiar With") return <DockerKubernetesFlow />;
   return <NodeMesh icon={Mail} />;
 }

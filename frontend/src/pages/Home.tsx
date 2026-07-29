@@ -4,6 +4,7 @@ import { profile, skills, experience, projects, education, certifications, asset
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
 import { ProjectIcons } from "@/components/ProjectIcons";
+import IDCard from "@/components/IDCard";
 
 const certImages: Record<string, string> = {
   javascript: assets.certJavascript,
@@ -31,13 +32,13 @@ export default function Home() {
         />
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-5xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[1.5fr_auto]">
-          <div className="animate-fade-up">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">{profile.role}</p>
-            <h1 className="mt-5 text-5xl font-bold leading-[1.05] sm:text-6xl">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary animate-fade-up" style={{ animationDelay: '0ms' }}>{profile.role}</p>
+            <h1 className="mt-5 text-5xl font-bold leading-[1.05] sm:text-6xl animate-fade-up" style={{ animationDelay: '100ms' }}>
               {profile.name.split(" ")[0]} <span className="text-gradient">{profile.name.split(" ")[1]}</span>
             </h1>
-            <p className="mt-6 max-w-2xl leading-relaxed text-muted-foreground">{profile.summary}</p>
-            <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm">
+            <p className="mt-6 max-w-2xl leading-relaxed text-muted-foreground animate-fade-up" style={{ animationDelay: '200ms' }}>{profile.summary}</p>
+            <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: '300ms' }}>
               <Link
                 to="/projects"
                 className="rounded-md bg-primary px-5 py-2.5 font-medium text-primary-foreground transition-opacity hover:opacity-90"
@@ -56,13 +57,7 @@ export default function Home() {
           </div>
 
           <div className="animate-fade-up justify-self-start md:justify-self-end" style={{ animationDelay: "160ms" }}>
-            <div className="relative h-48 w-48 overflow-hidden rounded-2xl border border-primary/40 bg-secondary shadow-[0_0_60px_-15px_var(--color-primary)] transition-transform duration-500 hover:scale-[1.03] sm:h-60 sm:w-60">
-              <img
-                src={assets.portrait}
-                alt="Portrait of Saifullah Khan"
-                className="h-full w-full object-cover object-top"
-              />
-            </div>
+            <IDCard />
           </div>
         </div>
 
