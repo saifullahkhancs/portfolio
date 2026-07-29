@@ -13,6 +13,7 @@ def create_app(config_object: str | None = None) -> Flask:
         os.environ.get("DATABASE_URL", "sqlite:///dev.db")
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-in-production")
 
     # Comma separated list of allowed frontend origins, e.g.
     # "https://your-app.vercel.app,https://yourdomain.com"
@@ -28,9 +29,13 @@ def create_app(config_object: str | None = None) -> Flask:
 
     from .routes.contact import contact_bp
     from .routes.health import health_bp
+    from .routes.auth import auth_bp
+    from .routes.admin import admin_bp
 
     app.register_blueprint(health_bp)
     app.register_blueprint(contact_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
 
     return app
 

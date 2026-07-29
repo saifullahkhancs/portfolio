@@ -20,6 +20,7 @@ export default function Projects() {
             <p className="mt-1 font-mono text-xs text-primary">{p.tagline}</p>
             <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
             <ProjectIcons name={p.name} />
+            {((p as any).projectUrl || (p as any).videoUrl) && <div className="mt-5 flex gap-4 font-mono text-xs text-primary">{(p as any).projectUrl && <a href={(p as any).projectUrl} target="_blank" rel="noreferrer">live project ↗</a>}{(p as any).videoUrl && <a href={(p as any).videoUrl} target="_blank" rel="noreferrer">watch demo ▶</a>}</div>}
             <ul className="mt-5 flex flex-wrap gap-2">
               {p.stack.map((s) => (
                 <li key={s} className="rounded-md bg-secondary px-2.5 py-1 font-mono text-xs text-secondary-foreground">

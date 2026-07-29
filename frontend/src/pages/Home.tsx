@@ -4,6 +4,7 @@ import { profile, skills, experience, projects, education, certifications, asset
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
 import { ProjectIcons } from "@/components/ProjectIcons";
+import { HangingCardAnimation } from "@/components/HangingCardAnimation";
 
 const certImages: Record<string, string> = {
   javascript: assets.certJavascript,
@@ -63,6 +64,7 @@ export default function Home() {
                 className="h-full w-full object-cover object-top"
               />
             </div>
+            <HangingCardAnimation />
           </div>
         </div>
 
