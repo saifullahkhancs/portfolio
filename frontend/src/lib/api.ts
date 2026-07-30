@@ -13,6 +13,14 @@ export interface ApiError {
   message: string;
 }
 
+export interface UploadResponse {
+  url: string;
+  path: string;
+  filename: string;
+  content_type: string;
+  size: number;
+}
+
 export interface Profile {
   id: number;
   name: string;
@@ -120,6 +128,20 @@ export async function submitContactForm(payload: ContactPayload): Promise<void> 
     const data = (await res.json().catch(() => null)) as ApiError | null;
     throw new Error(data?.message || "Something went wrong. Please try again.");
   }
+}
+
+export async function uploadMedia(file: File, kind = "media"): Promise<UploadResponse> {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("kind", kind);
+
+  const res = await fetch(`${API_URL}/api/uploads`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+    body,
+  });
+
+  return handleRes<UploadResponse>(res);
 }
 
 // ----- public GET -----

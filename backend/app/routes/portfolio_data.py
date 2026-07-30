@@ -1,4 +1,9 @@
-from flask import Blueprint, jsonify, request
+import os
+from pathlib import Path
+from uuid import uuid4
+
+from flask import Blueprint, current_app, jsonify, request, send_from_directory, url_for
+from werkzeug.utils import secure_filename
 from app.extensions import db
 from app.models import Profile, Experience, SkillGroup, Education, Certification, Project
 from .auth import auth_required
@@ -6,13 +11,98 @@ from .auth import auth_required
 portfolio_bp = Blueprint("portfolio", __name__)
 
 # ---------- helpers ----------
+IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp", "bmp"}
+VIDEO_EXTENSIONS = {"mp4", "webm", "mov", "m4v", "ogg", "ogv"}
+DOCUMENT_EXTENSIONS = {"pdf"}
+ALL_UPLOAD_EXTENSIONS = IMAGE_EXTENSIONS | VIDEO_EXTENSIONS | DOCUMENT_EXTENSIONS
+
+
 def _get_json():
     return request.get_json(silent=True) or {}
+
 
 def _save_and_return(obj, status=200):
     db.session.add(obj)
     db.session.commit()
     return jsonify(obj.to_dict()), status
+
+
+def _upload_root() -> str:
+    root = (
+        current_app.config.get("UPLOAD_FOLDER")
+        or os.environ.get("UPLOAD_FOLDER")
+        or os.path.abspath(os.path.join(current_app.root_path, "..", "uploads"))
+    )
+    os.makedirs(root, exist_ok=True)
+    return root
+
+
+def _allowed_for_kind(kind: str):
+    kind = (kind or "media").lower()
+    if kind in {"image", "photo", "profile", "portrait", "hero", "certificate", "certification"}:
+        return IMAGE_EXTENSIONS
+    if kind in {"video", "demo"}:
+        return VIDEO_EXTENSIONS
+    if kind in {"document", "resume", "pdf"}:
+        return DOCUMENT_EXTENSIONS
+    return ALL_UPLOAD_EXTENSIONS
+
+
+def _folder_for_extension(ext: str) -> str:
+    if ext in IMAGE_EXTENSIONS:
+        return "images"
+    if ext in VIDEO_EXTENSIONS:
+        return "videos"
+    if ext in DOCUMENT_EXTENSIONS:
+        return "documents"
+    return "media"
+
+
+def _external_upload_url(stored_path: str) -> str:
+    return url_for("portfolio.uploaded_file", filename=stored_path, _external=True)
+
+# ---------- uploads ----------
+@portfolio_bp.get("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(_upload_root(), filename)
+
+
+@portfolio_bp.post("/api/uploads")
+@auth_required
+def upload_file(user):
+    file = request.files.get("file") or request.files.get("media")
+    if not file or not file.filename:
+        return jsonify({"message": "No file selected."}), 400
+
+    original_name = secure_filename(file.filename)
+    ext = Path(original_name).suffix.lower().lstrip(".")
+    kind = (request.form.get("kind") or "media").lower()
+    allowed = _allowed_for_kind(kind)
+
+    if not ext or ext not in allowed:
+        return jsonify({
+            "message": f"Unsupported file type for {kind}. Allowed: {', '.join(sorted(allowed))}."
+        }), 400
+
+    stem = secure_filename(Path(original_name).stem)[:80] or "upload"
+    folder = _folder_for_extension(ext)
+    filename = f"{uuid4().hex}-{stem}.{ext}"
+    relative_path = f"{folder}/{filename}"
+    target_dir = os.path.join(_upload_root(), folder)
+    os.makedirs(target_dir, exist_ok=True)
+    target_path = os.path.join(target_dir, filename)
+    file.save(target_path)
+
+    size = os.path.getsize(target_path)
+    url = _external_upload_url(relative_path)
+    return jsonify({
+        "url": url,
+        "path": relative_path,
+        "filename": original_name,
+        "content_type": file.mimetype,
+        "size": size,
+    }), 201
+
 
 # ---------- aggregate ----------
 @portfolio_bp.get("/api/portfolio")

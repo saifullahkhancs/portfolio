@@ -34,7 +34,7 @@ export default function IDCard({ profile }: Props) {
   const isSwaying = stage === "swaying";
 
   return (
-    <div className="relative mx-auto h-[420px] w-[260px] select-none">
+    <div className="relative mx-auto h-[420px] w-[260px] select-none md:mx-0 md:ml-auto">
       {/* Nail / pin at top center */}
       <div className="absolute left-1/2 top-0 z-30 -translate-x-1/2">
         <div className="relative flex flex-col items-center">
@@ -76,34 +76,28 @@ export default function IDCard({ profile }: Props) {
               : "transform 0.55s cubic-bezier(0.34,1.56,0.64,1)",
         }}
       >
-        {/* STRIPS - forming a perfect V from nail apex to card attachment points */}
-        <div className="relative left-1/2 top-[18px] h-[86px] w-0 -translate-x-1/2">
+        {/* STRIPS - fixed V: both strips share the nail apex and end at the holder rivets */}
+        <div className="relative left-1/2 top-[18px] h-[86px] w-[180px] -translate-x-1/2">
           {/* apex knot where strips meet nail */}
-          <div className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full border border-white/80 bg-white shadow-sm" />
+          <div className="absolute left-1/2 top-0 z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border border-white/80 bg-white shadow-sm" />
 
-          {/* Left strip */}
+          {/* Left strip: one transform only, so the endpoint stays aligned with the left rivet. */}
           <div
-            className={`absolute top-[2px] h-[84px] w-[5px] origin-top rounded-full bg-gradient-to-b from-white to-zinc-100 shadow-[0_1px_3px_rgba(0,0,0,0.2)] ${
+            className={`absolute left-1/2 top-[2px] h-[116px] w-[5px] origin-top rounded-full bg-gradient-to-b from-white via-zinc-50 to-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.22)] ${
               isFalling ? "animate-flutter" : ""
             }`}
             style={{
-              left: "0px",
-              transform: isFalling
-                ? "translateX(-50%) rotate(-16deg) translateX(-34px)"
-                : "translateX(-50%) rotate(18deg) translateX(-38px)",
+              transform: isFalling ? "translateX(-50%) rotate(39deg)" : "translateX(-50%) rotate(42deg)",
               transition: "transform 0.6s cubic-bezier(0.34,1.4,0.64,1)",
             }}
           />
-          {/* Right strip */}
+          {/* Right strip: mirrored transform keeps the V symmetrical and attached. */}
           <div
-            className={`absolute top-[2px] h-[84px] w-[5px] origin-top rounded-full bg-gradient-to-b from-white to-zinc-100 shadow-[0_1px_3px_rgba(0,0,0,0.2)] ${
+            className={`absolute left-1/2 top-[2px] h-[116px] w-[5px] origin-top rounded-full bg-gradient-to-b from-white via-zinc-50 to-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.22)] ${
               isFalling ? "animate-flutter-right" : ""
             }`}
             style={{
-              left: "0px",
-              transform: isFalling
-                ? "translateX(-50%) rotate(16deg) translateX(34px)"
-                : "translateX(-50%) rotate(-18deg) translateX(38px)",
+              transform: isFalling ? "translateX(-50%) rotate(-39deg)" : "translateX(-50%) rotate(-42deg)",
               transition: "transform 0.6s cubic-bezier(0.34,1.4,0.64,1)",
             }}
           />

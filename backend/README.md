@@ -37,6 +37,7 @@ If you don't see tables in Supabase:
 
 ### Protected (Bearer token, dashboard)
 - `POST /api/auth/login`
+- `POST /api/uploads` – multipart direct uploads for dashboard media (`file` + `kind=image|video|document`); returns a URL that can be saved in the existing image/video URL fields
 - **Profiles**: `POST /api/profiles`, `PUT /api/profiles/<id>`, `PUT /api/profile`, `DELETE /api/profiles/<id>`
 - **Experiences**: `POST /api/experiences`, `PUT /api/experiences/<id>`, `DELETE /api/experiences/<id>`
 - **Projects**: `POST /api/projects`, `PUT /api/projects/<id>`, `DELETE /api/projects/<id>`
@@ -105,6 +106,7 @@ Same as Supabase, just use Cloud SQL connection string. Auto table creation stil
 
 - `/signin` – login with admin email/password
 - `/dashboard` – tabs for Profile, Experiences, Projects, Skills, Education, Certifications, Messages
+  - Profile photo, hero banner, certificate images and project demo videos now support either a direct file upload or a pasted URL. Direct uploads fill the URL field automatically; if no file is uploaded, the pasted URL is used.
   - All CRUD goes through protected APIs above.
   - Portfolio pages (`/`, `/experience`, `/projects`, `/contact`) fetch via `GET /api/portfolio` etc.
 

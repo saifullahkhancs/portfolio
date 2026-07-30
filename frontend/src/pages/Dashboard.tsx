@@ -14,9 +14,98 @@ import {
   educationsApi,
   certificationsApi,
   profilesApi,
+  uploadMedia,
 } from "@/lib/api";
 
 type Tab = "profile" | "experiences" | "projects" | "skills" | "education" | "certifications" | "messages";
+
+function isDirectVideoUrl(value: string) {
+  return /\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test(value.trim());
+}
+
+interface MediaUrlFieldProps {
+  label: string;
+  value: string;
+  accept: string;
+  preview?: "image" | "video" | "none";
+  className?: string;
+  uploading?: boolean;
+  onChange: (url: string) => void;
+  onUpload: (file: File) => void;
+}
+
+function MediaUrlField({
+  label,
+  value,
+  accept,
+  preview = "none",
+  className = "",
+  uploading = false,
+  onChange,
+  onUpload,
+}: MediaUrlFieldProps) {
+  const trimmed = (value || "").trim();
+
+  return (
+    <div className={`space-y-2 ${className}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-mono text-xs text-muted-foreground">{label}</span>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-primary/80">upload or url</span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+        <input
+          className="w-full rounded border bg-background p-2.5 text-sm"
+          placeholder="Paste a URL, or upload a file to fill this automatically"
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <label
+          className={`inline-flex cursor-pointer items-center justify-center rounded border border-border bg-secondary px-3 py-2.5 font-mono text-xs text-secondary-foreground transition-colors hover:border-primary/60 hover:text-primary ${
+            uploading ? "pointer-events-none opacity-60" : ""
+          }`}
+        >
+          {uploading ? "Uploading…" : "Upload file"}
+          <input
+            type="file"
+            accept={accept}
+            className="sr-only"
+            disabled={uploading}
+            onChange={(e) => {
+              const file = e.currentTarget.files?.[0];
+              if (file) onUpload(file);
+              e.currentTarget.value = "";
+            }}
+          />
+        </label>
+      </div>
+      <p className="text-[11px] leading-relaxed text-muted-foreground">
+        If you upload directly, the uploaded file URL is saved here. If you do not upload, the pasted URL is used.
+      </p>
+      {trimmed && preview === "image" && (
+        <img
+          src={trimmed}
+          alt={`${label} preview`}
+          className="max-h-40 w-full rounded-md border border-border object-cover object-top"
+          loading="lazy"
+        />
+      )}
+      {trimmed && preview === "video" && (
+        isDirectVideoUrl(trimmed) ? (
+          <video
+            src={trimmed}
+            className="max-h-44 w-full rounded-md border border-border bg-black"
+            controls
+            preload="metadata"
+          />
+        ) : (
+          <a href={trimmed} target="_blank" rel="noreferrer" className="font-mono text-xs text-primary hover:underline">
+            Open video URL ↗
+          </a>
+        )
+      )}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const token = typeof window !== "undefined" ? localStorage.getItem("portfolio_token") : null;
@@ -30,6 +119,7 @@ export default function Dashboard() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [saving, setSaving] = useState<string>("");
+  const [uploading, setUploading] = useState<string>("");
 
   useEffect(() => {
     if (!token) {
@@ -55,6 +145,18 @@ export default function Dashboard() {
       if (res.ok) setMessages(await res.json());
     } catch (e: any) {
       setError(e.message || "Unable to load dashboard.");
+    }
+  }
+
+  async function handleDirectUpload(file: File, kind: string, key: string, onUrl: (url: string) => void) {
+    setUploading(key);
+    try {
+      const uploaded = await uploadMedia(file, kind);
+      onUrl(uploaded.url);
+    } catch (e: any) {
+      alert(e.message || "Upload failed.");
+    } finally {
+      setUploading("");
     }
   }
 
@@ -322,14 +424,33 @@ export default function Dashboard() {
                 <span className="font-mono text-xs text-muted-foreground">LinkedIn</span>
                 <input className="w-full rounded border bg-background p-2.5 text-sm" value={profile.linkedin} onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })} />
               </label>
-              <label className="space-y-1.5">
-                <span className="font-mono text-xs text-muted-foreground">Profile Image URL</span>
-                <input className="w-full rounded border bg-background p-2.5 text-sm" value={profile.profile_image_url} onChange={(e) => setProfile({ ...profile, profile_image_url: e.target.value })} />
-              </label>
-              <label className="space-y-1.5 sm:col-span-2">
-                <span className="font-mono text-xs text-muted-foreground">Hero Banner URL</span>
-                <input className="w-full rounded border bg-background p-2.5 text-sm" value={profile.hero_banner_url} onChange={(e) => setProfile({ ...profile, hero_banner_url: e.target.value })} />
-              </label>
+              <MediaUrlField
+                label="Profile Photo"
+                value={profile.profile_image_url || ""}
+                accept="image/*"
+                preview="image"
+                uploading={uploading === "profile-photo"}
+                onChange={(url) => setProfile({ ...profile, profile_image_url: url })}
+                onUpload={(file) =>
+                  handleDirectUpload(file, "profile", "profile-photo", (url) =>
+                    setProfile((current) => (current ? { ...current, profile_image_url: url } : current))
+                  )
+                }
+              />
+              <MediaUrlField
+                className="sm:col-span-2"
+                label="Hero Banner Photo"
+                value={profile.hero_banner_url || ""}
+                accept="image/*"
+                preview="image"
+                uploading={uploading === "hero-banner"}
+                onChange={(url) => setProfile({ ...profile, hero_banner_url: url })}
+                onUpload={(file) =>
+                  handleDirectUpload(file, "hero", "hero-banner", (url) =>
+                    setProfile((current) => (current ? { ...current, hero_banner_url: url } : current))
+                  )
+                }
+              />
               <label className="space-y-1.5 sm:col-span-2">
                 <span className="font-mono text-xs text-muted-foreground">Resume URL</span>
                 <input className="w-full rounded border bg-background p-2.5 text-sm" value={profile.resume_url} onChange={(e) => setProfile({ ...profile, resume_url: e.target.value })} />
@@ -392,7 +513,22 @@ export default function Dashboard() {
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Tagline" value={p.tagline} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, tagline: e.target.value } : q)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Period" value={p.period} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, period: e.target.value } : q)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Project URL" value={p.project_url || (p as any).projectUrl || ""} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, project_url: e.target.value, projectUrl: e.target.value } : q)))} />
-                  <input className="rounded border bg-background p-2 text-sm" placeholder="Video URL" value={p.video_url || (p as any).videoUrl || ""} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, video_url: e.target.value, videoUrl: e.target.value } : q)))} />
+                  <MediaUrlField
+                    className="sm:col-span-2"
+                    label="Demo Video"
+                    value={p.video_url || (p as any).videoUrl || ""}
+                    accept="video/*"
+                    preview="video"
+                    uploading={uploading === `proj-video-${p.id}`}
+                    onChange={(url) =>
+                      setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, video_url: url, videoUrl: url } : q)))
+                    }
+                    onUpload={(file) =>
+                      handleDirectUpload(file, "video", `proj-video-${p.id}`, (url) =>
+                        setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, video_url: url, videoUrl: url } : q)))
+                      )
+                    }
+                  />
                 </div>
                 <textarea className="w-full rounded border bg-background p-2 text-sm" rows={3} value={p.description} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, description: e.target.value } : q)))} />
                 <div>
@@ -472,7 +608,22 @@ export default function Dashboard() {
                   <input className="rounded border bg-background p-2 text-sm font-semibold" placeholder="Name" value={c.name} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, name: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Issuer" value={c.issuer} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, issuer: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Year" value={c.year} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, year: ev.target.value } : x)))} />
-                  <input className="rounded border bg-background p-2 text-sm" placeholder="Image URL" value={c.image_url} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, image_url: ev.target.value } : x)))} />
+                  <MediaUrlField
+                    className="sm:col-span-2"
+                    label="Certificate Photo"
+                    value={c.image_url || ""}
+                    accept="image/*"
+                    preview="image"
+                    uploading={uploading === `cert-image-${c.id}`}
+                    onChange={(url) =>
+                      setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, image_url: url } : x)))
+                    }
+                    onUpload={(file) =>
+                      handleDirectUpload(file, "certificate", `cert-image-${c.id}`, (url) =>
+                        setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, image_url: url } : x)))
+                      )
+                    }
+                  />
                 </div>
                 <textarea className="w-full rounded border bg-background p-2 text-sm" rows={2} placeholder="Detail" value={c.detail} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, detail: ev.target.value } : x)))} />
                 <div className="flex gap-2">
