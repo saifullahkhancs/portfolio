@@ -71,6 +71,21 @@ curl http://localhost:5000/api/profile | jq
 
 Frontend will fallback to static `src/data/portfolio.ts` if API is unreachable, but when `VITE_API_URL` points to this backend it will use live DB data.
 
+## Seeding through the API (no DB access needed)
+
+`seed_via_api.py` pushes the same portfolio values into the database **over HTTP** — it logs in and POST/PUTs everything through the protected `/api/*` endpoints, so it works against a local or deployed backend without database credentials. Pure standard library (no `pip install`):
+
+```bash
+# backend must be running (python wsgi.py) and an admin must exist (create_admin.py)
+python seed_via_api.py --email admin@example.com --password yourpassword
+
+# against a deployed API, wiping existing rows first:
+python seed_via_api.py --api-url https://your-api.com --reset \
+  --email admin@example.com --password yourpassword
+```
+
+Config via env vars: `API_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `TOKEN` (existing Bearer token, skips login). If data already exists and `--reset` is not passed, the script aborts without changing anything (same contract as `seed.py`). `--reset` deletes all rows through the DELETE endpoints, then re-posts profile, experiences, projects, skill groups, education and certifications.
+
 ## Deploying to Supabase
 
 1. Get connection string from Supabase Dashboard > Database > Connection string (use Session pooler or Direct).
