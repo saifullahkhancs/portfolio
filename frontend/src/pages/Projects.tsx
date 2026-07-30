@@ -4,6 +4,10 @@ import { projects as staticProjects } from "@/data/portfolio";
 import { ProjectIcons } from "@/components/ProjectIcons";
 import { getProjects, getProfile, type Project } from "@/lib/api";
 
+function isDirectVideoUrl(value: string) {
+  return /\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test((value || "").trim());
+}
+
 export default function Projects() {
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -32,6 +36,14 @@ export default function Projects() {
             <p className="mt-1 font-mono text-xs text-primary">{p.tagline}</p>
             <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
             <ProjectIcons name={p.name} />
+            {isDirectVideoUrl(p.video_url || p.videoUrl || "") && (
+              <video
+                src={p.video_url || p.videoUrl}
+                className="mt-5 max-h-64 w-full rounded-lg border border-border bg-black"
+                controls
+                preload="metadata"
+              />
+            )}
             {(p.project_url || p.projectUrl || p.video_url || p.videoUrl) && (
               <div className="mt-5 flex gap-4 font-mono text-xs text-primary">
                 {(p.project_url || p.projectUrl) && (

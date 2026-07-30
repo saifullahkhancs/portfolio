@@ -14,6 +14,10 @@ def create_app(config_object: str | None = None) -> Flask:
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-in-production")
+    app.config["UPLOAD_FOLDER"] = os.environ.get(
+        "UPLOAD_FOLDER", os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
+    )
+    app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_UPLOAD_MB", "100")) * 1024 * 1024
 
     # Comma separated list of allowed frontend origins, e.g.
     # "https://your-app.vercel.app,https://yourdomain.com"

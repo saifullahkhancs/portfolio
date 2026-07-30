@@ -69,7 +69,7 @@ export default function Home() {
           }}
         />
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-5xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[1.6fr_auto]">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.45fr)_340px] lg:gap-14">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary animate-fade-up" style={{ animationDelay: '0ms' }}>{profile.title || profile.role}</p>
             <h1 className="mt-5 text-5xl font-bold leading-[1.05] sm:text-6xl animate-fade-up" style={{ animationDelay: '100ms' }}>
@@ -95,7 +95,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up justify-self-center md:justify-self-end" style={{ animationDelay: "160ms" }}>
+          <div className="animate-fade-up w-full max-w-[340px] justify-self-center md:justify-self-end xl:translate-x-8" style={{ animationDelay: "160ms" }}>
             <IDCard profile={profile} />
           </div>
         </div>
