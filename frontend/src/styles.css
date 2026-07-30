@@ -203,36 +203,6 @@
   }
 }
 
-@keyframes flutter {
-  0%, 100% {
-    transform: translateX(-50%) rotate(39deg);
-  }
-  25% {
-    transform: translateX(-50%) rotate(35deg) translateY(1px);
-  }
-  50% {
-    transform: translateX(-50%) rotate(44deg) translateY(-1px);
-  }
-  75% {
-    transform: translateX(-50%) rotate(37deg) translateY(0.5px);
-  }
-}
-
-@keyframes flutter-right {
-  0%, 100% {
-    transform: translateX(-50%) rotate(-39deg);
-  }
-  25% {
-    transform: translateX(-50%) rotate(-35deg) translateY(1px);
-  }
-  50% {
-    transform: translateX(-50%) rotate(-44deg) translateY(-1px);
-  }
-  75% {
-    transform: translateX(-50%) rotate(-37deg) translateY(0.5px);
-  }
-}
-
 @keyframes impact {
   0% {
     opacity: 0;

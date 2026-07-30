@@ -35,8 +35,12 @@ export default function IDCard({ profile }: Props) {
 
   return (
     <div className="relative mx-auto h-[420px] w-[260px] select-none md:mx-0 md:ml-auto">
-      {/* Nail / pin at top center */}
-      <div className="absolute left-1/2 top-0 z-30 -translate-x-1/2">
+      {/* Nail / pin appears only when the falling card reaches its resting position. */}
+      <div
+        className={`absolute left-1/2 top-0 z-30 -translate-x-1/2 transition-opacity duration-200 ${
+          isCaught ? "opacity-100" : "opacity-0"
+        }`}
+      >
         <div className="relative flex flex-col items-center">
           {/* metallic head */}
           <div className="h-4 w-4 rounded-full border-2 border-zinc-300 bg-zinc-100 shadow-[0_1px_4px_rgba(0,0,0,0.5),inset_0_1px_1px_white]" />
@@ -51,7 +55,7 @@ export default function IDCard({ profile }: Props) {
 
       {/* Impact ring */}
       <div
-        className={`pointer-events-none absolute left-1/2 top-[18px] z-10 h-6 w-6 -translate-x-1/2 rounded-full border border-primary/60 transition-all duration-500 ${
+        className={`pointer-events-none absolute left-1/2 top-[42px] z-10 h-6 w-6 -translate-x-1/2 rounded-full border border-primary/60 transition-all duration-500 ${
           isCaught ? "animate-[impact_0.6s_ease-out]" : "opacity-0 scale-50"
         }`}
       />
@@ -66,8 +70,8 @@ export default function IDCard({ profile }: Props) {
             stage === "hidden"
               ? "translate(-50%, -380px) rotate(-6deg)"
               : stage === "falling"
-              ? "translate(-50%, 36px) rotate(4deg)"
-              : "translate(-50%, 26px) rotate(0deg)",
+              ? "translate(-50%, 10px) rotate(4deg)"
+              : "translate(-50%, 0px) rotate(0deg)",
           transition:
             stage === "hidden"
               ? "none"
@@ -83,23 +87,11 @@ export default function IDCard({ profile }: Props) {
 
           {/* Left strip: one transform only, so the endpoint stays aligned with the left rivet. */}
           <div
-            className={`absolute left-1/2 top-[2px] h-[116px] w-[5px] origin-top rounded-full bg-gradient-to-b from-white via-zinc-50 to-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.22)] ${
-              isFalling ? "animate-flutter" : ""
-            }`}
-            style={{
-              transform: isFalling ? "translateX(-50%) rotate(39deg)" : "translateX(-50%) rotate(42deg)",
-              transition: "transform 0.6s cubic-bezier(0.34,1.4,0.64,1)",
-            }}
+            className="absolute left-1/2 top-[2px] h-[116px] w-[5px] origin-top translate-x-[-50%] rotate-[42deg] rounded-full bg-gradient-to-b from-white via-zinc-50 to-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.22)]"
           />
           {/* Right strip: mirrored transform keeps the V symmetrical and attached. */}
           <div
-            className={`absolute left-1/2 top-[2px] h-[116px] w-[5px] origin-top rounded-full bg-gradient-to-b from-white via-zinc-50 to-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.22)] ${
-              isFalling ? "animate-flutter-right" : ""
-            }`}
-            style={{
-              transform: isFalling ? "translateX(-50%) rotate(-39deg)" : "translateX(-50%) rotate(-42deg)",
-              transition: "transform 0.6s cubic-bezier(0.34,1.4,0.64,1)",
-            }}
+            className="absolute left-1/2 top-[2px] h-[116px] w-[5px] origin-top translate-x-[-50%] rotate-[-42deg] rounded-full bg-gradient-to-b from-white via-zinc-50 to-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.22)]"
           />
         </div>
 
