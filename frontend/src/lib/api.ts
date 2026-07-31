@@ -1,7 +1,14 @@
 // Base URL of the Flask API. Set VITE_API_URL in .env / Vercel project settings,
 // e.g. VITE_API_URL=https://api.yourdomain.com
+//
+// Static-deploy workflow: leave VITE_API_URL EMPTY (or unset) in the Vercel
+// project. In production that resolves to "" — the public getters below then
+// skip the network call entirely and return fallback.ts data instantly (no
+// failed localhost requests, no mixed-content/console errors). In local dev
+// it defaults to the local backend so the dashboard can edit live data.
 // @ts-ignore vite import.meta.env
-export const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8000";
+const _RAW_API_URL = ((import.meta as any).env?.VITE_API_URL || "").trim();
+export const API_URL = _RAW_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "");
 
 // static fallback that lives in src/data/fallback.ts – avoids blank screen when backend is down
 import {
@@ -164,13 +171,13 @@ export async function uploadMedia(file: File, kind = "media"): Promise<UploadRes
 }
 
 // ----- public GET with graceful fallback to static data so UI never goes blank -----
-function withFallback<T>(data: T | null | undefined, fallback: T): T {
-  if (!data) return fallback;
-  if (Array.isArray(data) && (data as any[]).length === 0) return fallback;
-  return data;
-}
 
+// When no backend is configured (static-only deployment), short-circuit to the
+// fallback instantly instead of firing a request that will fail. The catch
+// blocks below cover the local-dev case where a backend IS configured but
+// unreachable, so the UI can never go blank either way.
 export async function getPortfolio(): Promise<PortfolioData> {
+  if (!API_URL) return _fallback as PortfolioData;
   try {
     if (import.meta.env.DEV) console.log(`[api] fetching ${API_URL}/api/portfolio from origin ${typeof window !== 'undefined' ? window.location.origin : 'ssr'}`);
     const res = await fetch(`${API_URL}/api/portfolio`);
@@ -197,6 +204,7 @@ export async function getPortfolio(): Promise<PortfolioData> {
 }
 
 export async function getProfile(): Promise<Profile | null> {
+  if (!API_URL) return _fallback.profile as Profile;
   try {
     const res = await fetch(`${API_URL}/api/profile`);
     if (!res.ok) throw new Error("no profile");
@@ -210,6 +218,7 @@ export async function getProfile(): Promise<Profile | null> {
 }
 
 export async function getExperiences(): Promise<Experience[]> {
+  if (!API_URL) return _fallback.experiences as any;
   try {
     const res = await fetch(`${API_URL}/api/experiences`);
     const data = await handleRes<Experience[]>(res);
@@ -220,6 +229,7 @@ export async function getExperiences(): Promise<Experience[]> {
 }
 
 export async function getProjects(): Promise<Project[]> {
+  if (!API_URL) return _fallback.projects as any;
   try {
     const res = await fetch(`${API_URL}/api/projects`);
     const data = await handleRes<Project[]>(res);
@@ -230,6 +240,7 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function getSkillGroups(): Promise<SkillGroup[]> {
+  if (!API_URL) return _fallback.skills as any;
   try {
     const res = await fetch(`${API_URL}/api/skill-groups`);
     const data = await handleRes<SkillGroup[]>(res);
@@ -240,6 +251,7 @@ export async function getSkillGroups(): Promise<SkillGroup[]> {
 }
 
 export async function getEducations(): Promise<Education[]> {
+  if (!API_URL) return _fallback.educations as any;
   try {
     const res = await fetch(`${API_URL}/api/educations`);
     const data = await handleRes<Education[]>(res);
@@ -250,6 +262,7 @@ export async function getEducations(): Promise<Education[]> {
 }
 
 export async function getCertifications(): Promise<Certification[]> {
+  if (!API_URL) return _fallback.certifications as any;
   try {
     const res = await fetch(`${API_URL}/api/certifications`);
     const data = await handleRes<Certification[]>(res);
@@ -259,7 +272,7 @@ export async function getCertifications(): Promise<Certification[]> {
   }
 }
 
-// ----- authenticated mutations -----
+// ----- authenticated mutations (dashboard only — require a live backend) -----
 export async function login(email: string, password: string): Promise<{ token: string; user: any }> {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
