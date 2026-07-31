@@ -1,0 +1,2 @@
+# Keep the images folder in the repo. Actual image files are downloaded by
+# `bash scripts/fetch_assets.sh` (run it from the repo root).

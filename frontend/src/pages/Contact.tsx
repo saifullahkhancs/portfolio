@@ -1,13 +1,9 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
-import { submitContactForm, getProfile, fallbackProfile, type Profile } from "@/lib/api";
+import { getProfile, fallbackProfile, type Profile } from "@/lib/api";
 
-type Status = "idle" | "submitting" | "success" | "error";
 export default function Contact() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getProfile()
@@ -23,20 +19,6 @@ export default function Contact() {
     { label: "LinkedIn", value: "saifullah-khan", href: p.linkedin || "https://linkedin.com/in/saifullah-khan" },
     { label: "GitHub", value: "saifullahkhancs", href: p.github || "https://github.com/saifullahkhancs" },
   ];
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setStatus("submitting");
-    setError(null);
-    try {
-      await submitContactForm(form);
-      setStatus("success");
-      setForm({ name: "", email: "", message: "" });
-    } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    }
-  }
 
   return (
     <SiteShell profile={p}>
@@ -76,68 +58,20 @@ export default function Contact() {
           </a>
         </div>
 
+        {/* Contact form intentionally disabled on this site.
+            Reach out directly via the channels above instead. */}
         <div className="panel mt-4 p-6">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Send a message</p>
           <p className="mt-2 font-mono text-sm text-muted-foreground">
-            Goes straight to the backend and gets stored for follow-up. If backend is offline, your message will be saved locally and you can still reach me via email.
+            The contact form is disabled on this site. The quickest way to reach me is by{" "}
+            <a
+              className="text-primary underline-offset-2 hover:underline"
+              href={`mailto:${p.email || "saifullahkhank66@gmail.com"}`}
+            >
+              email
+            </a>{" "}
+            or LinkedIn — I usually reply within a day.
           </p>
-
-          <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="name" className="font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground">
-                  Name
-                </label>
-                <input
-                  id="name"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  className="mt-2 w-full rounded-md border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  className="mt-2 w-full rounded-md border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="message" className="font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground">
-                Message
-              </label>
-              <textarea
-                id="message"
-                required
-                rows={5}
-                value={form.message}
-                onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                className="mt-2 w-full rounded-md border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-              />
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                type="submit"
-                disabled={status === "submitting"}
-                className="rounded-md bg-primary px-5 py-2.5 font-mono text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                {status === "submitting" ? "Sending…" : "Send message"}
-              </button>
-              {status === "success" && (
-                <p className="font-mono text-sm text-primary">Thanks — message received.</p>
-              )}
-              {status === "error" && <p className="font-mono text-sm text-destructive">{error}</p>}
-            </div>
-          </form>
         </div>
       </div>
     </SiteShell>
