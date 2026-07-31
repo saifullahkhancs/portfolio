@@ -19,14 +19,17 @@ from app import create_app
 from app.extensions import db
 from app.models import Profile, Experience, Project, SkillGroup, Education, Certification
 
-ASSET_HOST = "https://saif-portofolio.lovable.app"
+# Portfolio assets are stored IN THE REPO under frontend/public/images/... and
+# served from there as /images/... (so the deployed static site has no external
+# image dependency). Drop your own image files into that folder — see
+# frontend/public/images/README.md for the exact filenames — then re-seed.
 ASSETS = {
-    "heroBanner": f"{ASSET_HOST}/__l5e/assets-v1/f21d14cc-ba6a-4abe-b699-4f4e323f56a2/hero-banner.png",
-    "portrait": f"{ASSET_HOST}/__l5e/assets-v1/728ff80c-dbea-4bb8-b824-f88615386187/saifullah-portrait.jpeg",
-    "resume": f"{ASSET_HOST}/__l5e/assets-v1/6d656b6e-0513-40c3-a30a-03fc6c99c836/Saifullah_Khan_Resume.pdf",
-    "certAzure": f"{ASSET_HOST}/__l5e/assets-v1/66495578-9a67-4d94-aabf-ac2cc3472fec/cert-azure.png",
-    "certHackerrank": f"{ASSET_HOST}/__l5e/assets-v1/dca8e020-cad0-4cd9-970f-5f290ab7e18c/cert-hackerrank.png",
-    "certJavascript": f"{ASSET_HOST}/__l5e/assets-v1/81ff7ef3-a02d-49d3-98ec-73e43dac5c87/cert-javascript.jpg",
+    "heroBanner": "/images/hero-banner.png",
+    "portrait": "/images/portrait.png",
+    "resume": "/images/resume.pdf",
+    "certAzure": "/images/cert-azure.png",
+    "certHackerrank": "/images/cert-hackerrank.png",
+    "certJavascript": "/images/cert-javascript.jpg",
 }
 
 PROFILE_DATA = {
