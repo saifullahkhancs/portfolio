@@ -3,6 +3,25 @@
 // @ts-ignore vite import.meta.env
 export const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8000";
 
+// static fallback that lives in src/data/fallback.ts – avoids blank screen when backend is down
+import {
+  fallbackPortfolio as _fallback,
+  fallbackProfile as _fallbackProfile,
+  fallbackExperiences as _fallbackExperiences,
+  fallbackProjects as _fallbackProjects,
+  fallbackSkills as _fallbackSkills,
+  fallbackEducations as _fallbackEducations,
+  fallbackCertifications as _fallbackCertifications,
+} from "@/data/fallback";
+// re-export for convenience
+export const fallbackPortfolio = _fallback;
+export const fallbackProfile = _fallbackProfile;
+export const fallbackExperiences = _fallbackExperiences;
+export const fallbackProjects = _fallbackProjects;
+export const fallbackSkills = _fallbackSkills;
+export const fallbackEducations = _fallbackEducations;
+export const fallbackCertifications = _fallbackCertifications;
+
 export interface ContactPayload {
   name: string;
   email: string;
@@ -144,47 +163,100 @@ export async function uploadMedia(file: File, kind = "media"): Promise<UploadRes
   return handleRes<UploadResponse>(res);
 }
 
-// ----- public GET -----
+// ----- public GET with graceful fallback to static data so UI never goes blank -----
+function withFallback<T>(data: T | null | undefined, fallback: T): T {
+  if (!data) return fallback;
+  if (Array.isArray(data) && (data as any[]).length === 0) return fallback;
+  return data;
+}
+
 export async function getPortfolio(): Promise<PortfolioData> {
-  const res = await fetch(`${API_URL}/api/portfolio`);
-  if (!res.ok) throw new Error("Failed to load portfolio");
-  return res.json();
+  try {
+    if (import.meta.env.DEV) console.log(`[api] fetching ${API_URL}/api/portfolio from origin ${typeof window !== 'undefined' ? window.location.origin : 'ssr'}`);
+    const res = await fetch(`${API_URL}/api/portfolio`);
+    if (import.meta.env.DEV) console.log(`[api] /api/portfolio -> ${res.status} ${res.statusText}, CORS ok? headers:`, [...res.headers.entries()].slice(0,5));
+    if (!res.ok) throw new Error(`Failed to load portfolio: ${res.status}`);
+    const json = (await res.json()) as PortfolioData;
+    if (import.meta.env.DEV) console.log(`[api] portfolio data`, { profile: !!json.profile, exp: json.experiences?.length, proj: json.projects?.length });
+    // if backend returns empty arrays, merge with fallback so page still renders
+    return {
+      profile: json.profile || _fallback.profile,
+      experiences: json.experiences?.length ? json.experiences : _fallback.experiences,
+      projects: json.projects?.length ? json.projects : _fallback.projects,
+      skill_groups: (json.skill_groups?.length ? json.skill_groups : _fallback.skill_groups) as any,
+      skills: (json.skills?.length ? json.skills : (json.skill_groups?.length ? json.skill_groups : _fallback.skills)) as any,
+      educations: json.educations?.length ? json.educations : _fallback.educations,
+      education: json.education || json.educations?.[0] || _fallback.education,
+      certifications: json.certifications?.length ? json.certifications : _fallback.certifications,
+    };
+  } catch (e) {
+    console.warn(`[api] getPortfolio failed (API_URL=${API_URL}), falling back to static data. Cause:`, e);
+    // backend down – return full static fallback, never crash UI
+    return _fallback as PortfolioData;
+  }
 }
 
 export async function getProfile(): Promise<Profile | null> {
   try {
     const res = await fetch(`${API_URL}/api/profile`);
-    if (!res.ok) return null;
+    if (!res.ok) throw new Error("no profile");
     const data = await res.json();
-    return data as Profile | null;
+    if (!data) return _fallback.profile as Profile;
+    return data as Profile;
   } catch {
-    return null;
+    // return static profile so header/footer + hero never blank
+    return _fallback.profile as Profile;
   }
 }
 
 export async function getExperiences(): Promise<Experience[]> {
-  const res = await fetch(`${API_URL}/api/experiences`);
-  return handleRes<Experience[]>(res);
+  try {
+    const res = await fetch(`${API_URL}/api/experiences`);
+    const data = await handleRes<Experience[]>(res);
+    return data?.length ? data : (_fallback.experiences as any);
+  } catch {
+    return _fallback.experiences as any;
+  }
 }
 
 export async function getProjects(): Promise<Project[]> {
-  const res = await fetch(`${API_URL}/api/projects`);
-  return handleRes<Project[]>(res);
+  try {
+    const res = await fetch(`${API_URL}/api/projects`);
+    const data = await handleRes<Project[]>(res);
+    return data?.length ? data : (_fallback.projects as any);
+  } catch {
+    return _fallback.projects as any;
+  }
 }
 
 export async function getSkillGroups(): Promise<SkillGroup[]> {
-  const res = await fetch(`${API_URL}/api/skill-groups`);
-  return handleRes<SkillGroup[]>(res);
+  try {
+    const res = await fetch(`${API_URL}/api/skill-groups`);
+    const data = await handleRes<SkillGroup[]>(res);
+    return data?.length ? data : (_fallback.skills as any);
+  } catch {
+    return _fallback.skills as any;
+  }
 }
 
 export async function getEducations(): Promise<Education[]> {
-  const res = await fetch(`${API_URL}/api/educations`);
-  return handleRes<Education[]>(res);
+  try {
+    const res = await fetch(`${API_URL}/api/educations`);
+    const data = await handleRes<Education[]>(res);
+    return data?.length ? data : (_fallback.educations as any);
+  } catch {
+    return _fallback.educations as any;
+  }
 }
 
 export async function getCertifications(): Promise<Certification[]> {
-  const res = await fetch(`${API_URL}/api/certifications`);
-  return handleRes<Certification[]>(res);
+  try {
+    const res = await fetch(`${API_URL}/api/certifications`);
+    const data = await handleRes<Certification[]>(res);
+    return data?.length ? data : (_fallback.certifications as any);
+  } catch {
+    return _fallback.certifications as any;
+  }
 }
 
 // ----- authenticated mutations -----

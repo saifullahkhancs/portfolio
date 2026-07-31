@@ -6,6 +6,7 @@ import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -17,7 +18,7 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <>
+    <ErrorBoundary>
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -27,6 +28,6 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 }

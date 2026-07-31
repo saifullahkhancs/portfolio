@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { SiteShell } from "@/components/SiteShell";
 import { Reveal } from "@/components/Reveal";
@@ -9,39 +9,56 @@ import { TiltCard } from "@/components/TiltCard";
 import IDCard from "@/components/IDCard";
 import HeroAnimation from "@/components/HeroAnimation";
 import CertCarousel from "@/components/CertCarousel";
-import { getPortfolio, type Education, type PortfolioData } from "@/lib/api";
+import { getPortfolio, type Education, type PortfolioData, fallbackPortfolio } from "@/lib/api";
 
 export default function Home() {
   const [data, setData] = useState<PortfolioData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
     getPortfolio()
-      .then(setData)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .then((d) => {
+        if (!mounted) return;
+        setData(d);
+      })
+      .catch((err: any) => {
+        if (!mounted) return;
+        setError(err?.message || "Failed to load");
+        setData(fallbackPortfolio as PortfolioData);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // fallbacks
-  const profile = data?.profile || ({} as any);
-  const skills = (data?.skills || []) as any[];
-  const experience = data?.experiences || [];
-  const projects = data?.projects || [];
-  const education: Education | null = data?.education || data?.educations?.[0] || null;
-  const certifications = data?.certifications || [];
+  const source = useMemo(() => data || (fallbackPortfolio as PortfolioData), [data]);
+  const profile = source?.profile || (fallbackPortfolio.profile as any);
+  const skills = (source?.skills?.length ? source.skills : source?.skill_groups?.length ? source.skill_groups : fallbackPortfolio.skills) as any[];
+  const experience = (source?.experiences?.length ? source.experiences : fallbackPortfolio.experiences) as any[];
+  const projects = (source?.projects?.length ? source.projects : fallbackPortfolio.projects) as any[];
+  const education: Education | null = (source?.education || source?.educations?.[0] || fallbackPortfolio.education) as any;
+  const certifications = (source?.certifications?.length ? source.certifications : fallbackPortfolio.certifications) as any[];
 
   const heroBanner = (profile?.hero_banner_url as string) || "";
   const resumeUrl = (profile?.resume_url as string) || "";
+  const firstExp = (experience?.[0] || null) as any;
 
   return (
     <SiteShell profile={profile}>
       <section className="relative overflow-hidden border-b border-border">
-        <img
-          src={heroBanner}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
-        />
+        {heroBanner ? (
+          <img
+            src={heroBanner}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
+          />
+        ) : null}
         <div
           className="pointer-events-none absolute inset-0"
           aria-hidden="true"
@@ -53,24 +70,33 @@ export default function Home() {
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.4fr)_360px] lg:gap-14">
           <div>
-          <HeroAnimation name={profile?.name || ""} title={profile?.title || profile?.role || ""} desc={profile?.description || profile?.summary || ""} />
+            <HeroAnimation
+              name={profile?.name || "Saifullah Khan"}
+              title={profile?.title || (profile as any)?.role || "Software Engineer"}
+              desc={profile?.description || (profile as any)?.summary || fallbackPortfolio.profile!.description}
+            />
 
-            <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: '300ms' }}>
+            <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: "300ms" }}>
               <Link
                 to="/projects"
                 className="rounded-md bg-primary px-5 py-2.5 font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 View projects
               </Link>
-              <a
-                href={resumeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-md border border-border bg-background/60 px-5 py-2.5 font-medium backdrop-blur transition-colors hover:bg-secondary"
-              >
-                Download résumé
-              </a>
+              {resumeUrl ? (
+                <a
+                  href={resumeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-md border border-border bg-background/60 px-5 py-2.5 font-medium backdrop-blur transition-colors hover:bg-secondary"
+                >
+                  Download résumé
+                </a>
+              ) : null}
               {loading && <span className="ml-2 self-center text-xs text-muted-foreground">syncing from backend…</span>}
+              {error && !loading && (
+                <span className="ml-2 self-center text-xs text-amber-500">backend offline – showing cached portfolio</span>
+              )}
             </div>
           </div>
 
@@ -84,7 +110,7 @@ export default function Home() {
             {[
               ["Experience", "3+ years engineering"],
               ["Focus", "APIs · microservices · full stack"],
-              ["Based in", profile?.location || ""],
+              ["Based in", profile?.location || "Lahore, Pakistan"],
             ].map(([k, v]) => (
               <div key={k}>
                 <dt className="text-xs uppercase tracking-widest text-muted-foreground">{k}</dt>
@@ -101,7 +127,7 @@ export default function Home() {
         </Reveal>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {skills.map((group: any, i: number) => (
-            <Reveal key={group.group || group.group_name} delay={i * 70}>
+            <Reveal key={group.group || group.group_name || i} delay={i * 70}>
               <div className="skill-card panel relative h-full overflow-hidden p-5 transition-colors duration-300 hover:border-primary/50">
                 <SkillBackdrop group={group.group || group.group_name} />
                 <div className="relative">
@@ -145,7 +171,7 @@ export default function Home() {
         </Reveal>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {projects.slice(0, 2).map((p: any, i: number) => (
-            <Reveal key={p.name} delay={i * 110}>
+            <Reveal key={p.name || i} delay={i * 110}>
               <TiltCard>
                 <article className="panel h-full p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/50 hover:shadow-[0_0_40px_-18px_var(--color-primary)]">
                   <h3 className="text-lg font-semibold">{p.name}</h3>
@@ -170,18 +196,24 @@ export default function Home() {
         </Reveal>
         <Reveal delay={90}>
           <div className="panel mt-8 p-6">
-            <p className="font-mono text-xs text-muted-foreground">{(experience[0] as any).period}</p>
-            <h3 className="mt-2 text-lg font-semibold">
-              {(experience[0] as any).role} · <span className="text-primary">{(experience[0] as any).company}</span>
-            </h3>
-            <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              {((experience[0] as any).points || []).slice(0, 3).map((pt: string) => (
-                <li key={pt} className="flex gap-3">
-                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                  {pt}
-                </li>
-              ))}
-            </ul>
+            {firstExp ? (
+              <>
+                <p className="font-mono text-xs text-muted-foreground">{firstExp.period}</p>
+                <h3 className="mt-2 text-lg font-semibold">
+                  {firstExp.role} · <span className="text-primary">{firstExp.company}</span>
+                </h3>
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  {(firstExp.points || []).slice(0, 3).map((pt: string) => (
+                    <li key={pt} className="flex gap-3">
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                      {pt}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Experience details coming soon.</p>
+            )}
           </div>
         </Reveal>
       </section>
@@ -192,15 +224,12 @@ export default function Home() {
         </Reveal>
         <Reveal delay={90}>
           <div className="mt-10">
-            <CertCarousel
-              items={certifications as any[]}
-              imageFor={(c: any) => c.image_url || ""}
-            />
+            <CertCarousel items={certifications as any[]} imageFor={(c: any) => c.image_url || ""} />
           </div>
         </Reveal>
       </section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-4">
+      <section className="mx-auto max-w-5xl px-6 pb-20">
         <Reveal>
           <h2 className="text-2xl font-bold">Education</h2>
         </Reveal>
