@@ -244,7 +244,8 @@
 
 /* Full drop from above the screen: gravity accelerates the fall,
    the card lands, bounces twice with decaying height, then rests.
-   The per-keyframe easing functions shape each segment. */
+   The per-keyframe easing functions shape each segment.
+   Slowed down from 2.8s → 4.8s for a more dramatic, cinematic entrance. */
 @keyframes lanyard-drop {
   0% {
     transform: translateY(-110vh);
@@ -268,6 +269,18 @@
   }
   100% {
     transform: translateY(0);
+  }
+}
+
+/* Loader bars for the full-page loading screen */
+@keyframes loader-bar {
+  0%, 100% {
+    transform: scaleY(0.4);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
   }
 }
 
