@@ -18,7 +18,7 @@ export function TiltCard({ children, className = "" }: { children: ReactNode; cl
     const py = (e.clientY - r.top) / r.height - 0.5;
     setStyle({
       transform: `perspective(900px) rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 7).toFixed(2)}deg) translateY(-6px)`,
-      transition: "transform 80ms linear",
+      transition: "transform 180ms linear",
     });
     setSheen({
       opacity: 1,

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
 import { Reveal } from "@/components/Reveal";
 import { TiltCard } from "@/components/TiltCard";
-import { projects as staticProjects } from "@/data/portfolio";
 import { ProjectIcons } from "@/components/ProjectIcons";
 import { getProjects, getProfile, type Project } from "@/lib/api";
 
@@ -19,7 +18,7 @@ export default function Projects() {
     getProfile().then(setProfile).catch(() => {});
   }, []);
 
-  const list = projects?.length ? projects : (staticProjects as unknown as Project[]);
+  const list = projects || [];
 
   return (
     <SiteShell profile={profile}>

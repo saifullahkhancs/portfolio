@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
-import { profile as staticProfile, assets as staticAssets } from "@/data/portfolio";
 import { submitContactForm, getProfile, type Profile } from "@/lib/api";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -15,15 +14,7 @@ export default function Contact() {
     getProfile().then(setProfile).catch(() => {});
   }, []);
 
-  const p = profile || {
-    name: staticProfile.name,
-    email: staticProfile.email,
-    phone: staticProfile.phone,
-    linkedin: staticProfile.linkedin,
-    github: staticProfile.github,
-    location: staticProfile.location,
-    resume_url: staticAssets.resume,
-  } as any;
+  const p = profile || ({ name: "", email: "", phone: "", linkedin: "", github: "", location: "", resume_url: "" } as any);
 
   const links = [
     { label: "Email", value: p.email, href: `mailto:${p.email}` },
@@ -75,7 +66,7 @@ export default function Contact() {
             <p className="mt-2 font-mono text-sm">Full PDF résumé, always up to date.</p>
           </div>
           <a
-            href={p.resume_url || staticAssets.resume}
+            href={p.resume_url || ""}
             target="_blank"
             rel="noreferrer"
             className="rounded-md bg-primary px-5 py-2.5 font-mono text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
