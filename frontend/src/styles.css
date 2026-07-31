@@ -160,64 +160,6 @@
   }
 }
 
-@keyframes sway {
-  0% {
-    transform: translate(-50%, 26px) rotate(-4deg);
-  }
-  25% {
-    transform: translate(-50%, 26px) rotate(4deg);
-  }
-  50% {
-    transform: translate(-50%, 26px) rotate(-2.5deg);
-  }
-  75% {
-    transform: translate(-50%, 26px) rotate(2deg);
-  }
-  100% {
-    transform: translate(-50%, 26px) rotate(0deg);
-  }
-}
-
-@keyframes sway-idle {
-  0%, 100% {
-    transform: translate(-50%, 26px) rotate(-1.2deg);
-  }
-  50% {
-    transform: translate(-50%, 26px) rotate(1.2deg);
-  }
-}
-
-@keyframes wave {
-  0%,
-  100% {
-    transform: translateX(-50%) scaleY(1);
-  }
-  25% {
-    transform: translateX(-50%) scaleY(1.1);
-  }
-  50% {
-    transform: translateX(-50%) scaleY(0.95);
-  }
-  75% {
-    transform: translateX(-50%) scaleY(1.05);
-  }
-}
-
-@keyframes impact {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.2);
-  }
-  20% {
-    opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2.6);
-  }
-}
-
 @utility animate-code-scroll {
   animation: code-scroll 14s linear infinite;
 }
@@ -228,23 +170,6 @@
 
 @utility animate-node-pulse {
   animation: node-pulse 2.2s ease-in-out infinite;
-}
-
-@utility animate-sway {
-  animation: sway-idle 3.2s ease-in-out infinite;
-  transform-origin: top center;
-}
-
-@utility animate-wave {
-  animation: wave 0.5s ease-in-out infinite;
-}
-
-@utility animate-flutter {
-  animation: flutter 0.28s ease-in-out infinite;
-}
-
-@utility animate-flutter-right {
-  animation: flutter-right 0.28s ease-in-out infinite;
 }
 
 @utility skill-backdrop {
@@ -293,14 +218,175 @@
   }
 }
 
-/* Legacy hanging-scene kept for backward compat but new IDCard uses inline styles + sway-idle */
-.hanging-scene { display: none; }
+/* ------------------------------------------------------------------
+   Lanyard ID card — gentle idle sway around the top pivot point
+------------------------------------------------------------------ */
+@keyframes lanyard-sway {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
 
-/* new utility for reduced motion */
+/* ------------------------------------------------------------------
+   Hero extraction machine — packets, wires, caret, scan
+------------------------------------------------------------------ */
+@keyframes packet-travel {
+  0% {
+    left: 0%;
+    transform: translate(0, -50%) scale(0.92);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    transform: translate(-100%, -50%) scale(0.92);
+    opacity: 0;
+  }
+}
+
+@keyframes packet-drop {
+  0% {
+    top: -30px;
+    transform: translateX(-50%) scale(0.92);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 26px;
+    transform: translateX(-50%) scale(0.92);
+    opacity: 0;
+  }
+}
+
+@keyframes wire-pulse-down {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(100% - 6px);
+    opacity: 0;
+  }
+}
+
+@keyframes wire-pulse-up {
+  0% {
+    top: calc(100% - 6px);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scan-sweep {
+  0% {
+    top: -20%;
+  }
+  100% {
+    top: 120%;
+  }
+}
+
+@keyframes screen-scan {
+  0% {
+    left: 8%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 86%;
+    opacity: 0;
+  }
+}
+
+@keyframes node-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 4px 0 var(--color-primary);
+    opacity: 0.55;
+  }
+  50% {
+    box-shadow: 0 0 12px 2px var(--color-primary);
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Tools marquee strips
+------------------------------------------------------------------ */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-marquee-x {
+  animation: marquee-x var(--marquee-duration, 32s) linear infinite;
+}
+
+@utility marquee-mask {
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+
+/* pause strips on hover so users can read them */
+.marquee-strip:hover .animate-marquee-x {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-sway,
-  .animate-flutter,
-  .animate-flutter-right {
+  .animate-marquee-x,
+  .hero-machine * {
     animation: none !important;
+  }
+  .hero-machine .packet,
+  .hero-machine .pulse-dot {
+    display: none !important;
   }
 }

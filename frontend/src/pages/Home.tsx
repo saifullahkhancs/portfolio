@@ -5,6 +5,8 @@ import { profile as staticProfile, skills as staticSkills, experience as staticE
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
 import { ProjectIcons } from "@/components/ProjectIcons";
+import { ToolStrips } from "@/components/ToolStrips";
+import { TiltCard } from "@/components/TiltCard";
 import IDCard from "@/components/IDCard";
 import HeroAnimation from "@/components/HeroAnimation";
 import { getPortfolio, type PortfolioData } from "@/lib/api";
@@ -93,7 +95,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up w-full max-w-[340px] justify-self-center md:justify-self-end xl:translate-x-8" style={{ animationDelay: "160ms" }}>
+          <div className="animate-fade-up w-full max-w-[340px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
             <IDCard profile={profile} />
           </div>
         </div>
@@ -144,6 +146,17 @@ export default function Home() {
 
       <section className="mx-auto max-w-5xl px-6 pb-20">
         <Reveal>
+          <h2 className="text-2xl font-bold">Tools &amp; platforms</h2>
+        </Reveal>
+        <Reveal delay={90}>
+          <div className="mt-8">
+            <ToolStrips />
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-6 pb-20">
+        <Reveal>
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="text-2xl font-bold">Selected work</h2>
             <Link to="/projects" className="font-mono text-sm text-primary hover:underline">
@@ -154,12 +167,14 @@ export default function Home() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {projects.slice(0, 2).map((p: any, i: number) => (
             <Reveal key={p.name} delay={i * 110}>
-              <article className="panel h-full p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50">
-                <h3 className="text-lg font-semibold">{p.name}</h3>
-                <p className="mt-1 font-mono text-xs text-primary">{p.tagline}</p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
-                <ProjectIcons name={p.name} />
-              </article>
+              <TiltCard>
+                <article className="panel h-full p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/50 hover:shadow-[0_0_40px_-18px_var(--color-primary)]">
+                  <h3 className="text-lg font-semibold">{p.name}</h3>
+                  <p className="mt-1 font-mono text-xs text-primary">{p.tagline}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+                  <ProjectIcons name={p.name} />
+                </article>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
