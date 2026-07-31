@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 /**
  * Coverflow-style certificate carousel.
- *  - certificates are shown as circles
+ *  - certificates are shown as square cards
  *  - the active one sits in the centre, fully opaque and largest
  *  - the neighbours sit left / right, smaller and faded
  *  - the most recently added certificate starts in front
@@ -62,7 +62,7 @@ export default function CertCarousel({
               aria-label={c.name}
               aria-hidden={hidden}
               tabIndex={hidden ? -1 : 0}
-              className="absolute left-1/2 top-1/2 rounded-full transition-all duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="absolute left-1/2 top-1/2 rounded-[22px] transition-all duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               style={{
                 transform: `translate(-50%, -50%) translateX(${d * 190}px) scale(${1 - abs * 0.22})`,
                 opacity: hidden ? 0 : abs === 0 ? 1 : abs === 1 ? 0.45 : 0.18,
@@ -73,7 +73,7 @@ export default function CertCarousel({
               }}
             >
               <span
-                className={`block h-[260px] w-[260px] overflow-hidden rounded-full border-2 bg-secondary shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ${
+                className={`block h-[260px] w-[260px] overflow-hidden rounded-[22px] border-2 bg-secondary shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ${
                   abs === 0 ? "border-primary/70" : "border-border"
                 }`}
               >
