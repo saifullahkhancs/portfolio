@@ -110,8 +110,19 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
           })}
         </div>
 
-        {/* progress rail */}
-        <div className="mt-8 flex items-center gap-3">
+        {/* prev / next controls + progress rail */}
+        <div className="mt-8 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => jumpTo(Math.max(0, current - 1))}
+            disabled={current === 0}
+            aria-label="Previous role"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface/80 font-mono text-sm text-primary transition-colors hover:border-primary/60 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            &lt;
+          </button>
+
+          <div className="flex items-center gap-3">
           {jobs.map((job: any, i: number) => (
             <button
               key={job.company}
@@ -123,6 +134,17 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
               }`}
             />
           ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => jumpTo(Math.min(n - 1, current + 1))}
+            disabled={current >= n - 1}
+            aria-label="Next role"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface/80 font-mono text-sm text-primary transition-colors hover:border-primary/60 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            &gt;
+          </button>
         </div>
         <p className="mt-3 font-mono text-xs text-muted-foreground">
           {(jobs[current] as any)?.company} — {current + 1} of {n}
