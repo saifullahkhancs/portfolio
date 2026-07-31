@@ -219,38 +219,49 @@
 }
 
 /* ------------------------------------------------------------------
-   Lanyard ID card — gentle idle sway around the top pivot point
+   Lanyard ID card — gentle idle sway around the top pivot point.
+   Loops through 0deg so it starts exactly where the drop ends
+   (no snap when the drop hands off to the swing).
 ------------------------------------------------------------------ */
 @keyframes lanyard-sway {
   0%,
   100% {
+    transform: rotate(0deg);
+  }
+  25% {
     transform: rotate(-1.6deg);
   }
-  50% {
+  75% {
     transform: rotate(1.6deg);
   }
 }
 
-/* Drop from above, settle with a little bounce, then hand off to sway */
+/* Full drop from above the screen: gravity accelerates the fall,
+   the card lands, bounces twice with decaying height, then rests.
+   The per-keyframe easing functions shape each segment. */
 @keyframes lanyard-drop {
   0% {
-    transform: translateY(-120px);
-    opacity: 0;
+    transform: translateY(-110vh);
+    animation-timing-function: cubic-bezier(0.6, 0.04, 0.82, 0.4); /* accelerate: gravity */
   }
-  15% {
-    opacity: 1;
+  55% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.25, 0.65, 0.4, 1); /* spring up, decelerate */
   }
-  50% {
-    transform: translateY(6px);
-    opacity: 1;
+  72% {
+    transform: translateY(-9px);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19); /* fall back down */
   }
-  70% {
+  85% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.25, 0.65, 0.4, 1); /* spring up again */
+  }
+  93% {
     transform: translateY(-3px);
-    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   100% {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
