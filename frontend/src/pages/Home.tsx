@@ -9,7 +9,7 @@ import { TiltCard } from "@/components/TiltCard";
 import IDCard from "@/components/IDCard";
 import HeroAnimation from "@/components/HeroAnimation";
 import CertCarousel from "@/components/CertCarousel";
-import { getPortfolio, type PortfolioData } from "@/lib/api";
+import { getPortfolio, type Education, type PortfolioData } from "@/lib/api";
 
 export default function Home() {
   const [data, setData] = useState<PortfolioData | null>(null);
@@ -27,7 +27,7 @@ export default function Home() {
   const skills = (data?.skills || []) as any[];
   const experience = data?.experiences || [];
   const projects = data?.projects || [];
-  const education = data?.education || data?.educations?.[0] || null;
+  const education: Education | null = data?.education || data?.educations?.[0] || null;
   const certifications = data?.certifications || [];
 
   const heroBanner = (profile?.hero_banner_url as string) || "";
@@ -206,12 +206,18 @@ export default function Home() {
         </Reveal>
         <Reveal delay={90}>
           <div className="panel mt-8 p-6">
-            <p className="font-mono text-xs text-muted-foreground">{education.period}</p>
-            <h3 className="mt-2 text-lg font-semibold">{education.degree}</h3>
-            <p className="font-mono text-sm text-primary">
-              {education.school} — CGPA {education.cgpa}
-            </p>
-            <p className="mt-3 text-sm text-muted-foreground">{education.coursework}</p>
+            {education ? (
+              <>
+                <p className="font-mono text-xs text-muted-foreground">{education.period}</p>
+                <h3 className="mt-2 text-lg font-semibold">{education.degree}</h3>
+                <p className="font-mono text-sm text-primary">
+                  {education.school} — CGPA {education.cgpa}
+                </p>
+                <p className="mt-3 text-sm text-muted-foreground">{education.coursework}</p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Education details coming soon.</p>
+            )}
           </div>
         </Reveal>
       </section>
