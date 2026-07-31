@@ -19,13 +19,10 @@ from app import create_app
 from app.extensions import db
 from app.models import Profile, Experience, Project, SkillGroup, Education, Certification
 
-# Portfolio assets are now stored IN THE REPO and served from the frontend's
-# public/ folder (frontend/public/images/...), so the deployed static site has
-# no external image dependency.
-#
-# Run `bash scripts/fetch_assets.sh` (from the repo root) once to download the
-# originals into frontend/public/images/, then re-seed. The source URLs the
-# script downloads from are kept in scripts/fetch_assets.sh.
+# Portfolio assets are stored IN THE REPO under frontend/public/images/... and
+# served from there as /images/... (so the deployed static site has no external
+# image dependency). Drop your own image files into that folder — see
+# frontend/public/images/README.md for the exact filenames — then re-seed.
 ASSETS = {
     "heroBanner": "/images/hero-banner.png",
     "portrait": "/images/portrait.png",

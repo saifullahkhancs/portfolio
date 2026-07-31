@@ -123,10 +123,18 @@ cd frontend && npm run build
 - **Vercel project setting:** leave `VITE_API_URL` empty/unset. Set it to
   `http://localhost:8000` only in your local `.env`.
 
-> ⚠️ If you upload media via the local dashboard, the backend stores
-> `http://localhost:8000/uploads/...` URLs — those won't resolve on Vercel.
-> Use public image URLs instead (or move uploads to a host), then re-run
-> `export_fallback.py`.
+> ⚠️ Image/media URLs in the DB must be either `/images/...` paths (files you
+> commit under `frontend/public/images/` — see that folder's README) or public
+> absolute URLs. Anything pointing at `http://localhost:...` will not resolve on
+> Vercel.
+
+### Bundled images (frontend/public/images/)
+
+Portfolio images (portrait, hero banner, résumé PDF, certificates) live **in the
+repo** under `frontend/public/images/` and are served as `/images/...`. There is
+no external image host. Drop your own files there with the names listed in
+`frontend/public/images/README.md`, and **commit them to git** (Vercel only
+deploys committed files — local-only copies don't ship).
 
 ## Stack
 - Flask, SQLAlchemy, Flask-Migrate, Flask-CORS, psycopg
