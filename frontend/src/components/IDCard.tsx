@@ -18,10 +18,10 @@ export default function IDCard({ profile }: Props) {
       <div className="relative overflow-hidden rounded-[12px] border border-border bg-[#fbfcfe] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
         {/* Image ~80% */}
         <div className="relative h-[220px] w-full overflow-hidden bg-zinc-200">
-          <img
+            <img
             src={p.profile_image_url || assets.portrait}
             alt="Profile"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover object-center"
             loading="eager"
           />
         </div>
