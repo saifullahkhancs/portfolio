@@ -72,7 +72,7 @@ export default function Home() {
           }}
         />
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.45fr)_340px] lg:gap-14">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.4fr)_360px] lg:gap-14">
           <div>
           <HeroAnimation name={profile.name || staticProfile.name} title={profile.title || profile.role} desc={profile.description || profile.summary} />
 
@@ -95,7 +95,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up w-full max-w-[340px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
+          <div className="animate-fade-up w-full max-w-[360px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
             <IDCard profile={profile} />
           </div>
         </div>

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 /**
  * Hero "extraction machine":
  *  1. two side wires carry word-packets INTO a single computer icon
- *     (plus a couple of packets drop into it from above)
  *  2. the computer sits directly above the description box and is
  *     wired up to the title / name rows and down to the description box
  *  3. as packets pass through, the computer "extracts" the text:
@@ -14,7 +13,6 @@ import { useEffect, useMemo, useState } from "react";
 
 const LEFT_PACKETS = ["Python", "FastAPI", "Flask", "Django"];
 const RIGHT_PACKETS = ["React", ".NET", "Kafka", "SQL"];
-const TOP_PACKETS = ["Docker", "JWT"];
 
 type Phase = "boot" | "title" | "name" | "desc" | "done";
 
@@ -127,19 +125,6 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
                 animationDelay: `${(0.7 + i * 1.25).toFixed(1)}s`,
                 animationDirection: "reverse",
               }}
-            >
-              {w}
-            </span>
-          ))}
-        </div>
-
-        {/* packets dropping in from above the computer */}
-        <div className="absolute left-1/2 top-[-6px] h-[34px] w-40 -translate-x-1/2">
-          {TOP_PACKETS.map((w, i) => (
-            <span
-              key={w}
-              className={`${packetClass} animate-[packet-drop_3.2s_ease-in_infinite]`}
-              style={{ left: i === 0 ? "32%" : "68%", animationDuration: `${(3.4 + i).toFixed(1)}s`, animationDelay: `${(1.1 + i * 1.7).toFixed(1)}s` }}
             >
               {w}
             </span>
