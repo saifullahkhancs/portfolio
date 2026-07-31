@@ -64,10 +64,10 @@ DATABASE_URL=sqlite:///dev.db python seed.py --reset
 # or for Supabase:
 # DATABASE_URL=postgresql://postgres:...@db.supabase.co:5432/postgres python seed.py --reset
 
-python wsgi.py   # http://localhost:5000
+python wsgi.py   # http://localhost:8000
 # verify
-curl http://localhost:5000/api/portfolio | jq
-curl http://localhost:5000/api/profile | jq
+curl http://localhost:8000/api/portfolio | jq
+curl http://localhost:8000/api/profile | jq
 ```
 
 Frontend will fallback to static `src/data/portfolio.ts` if API is unreachable, but when `VITE_API_URL` points to this backend it will use live DB data.

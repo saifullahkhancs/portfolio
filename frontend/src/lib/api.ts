@@ -1,7 +1,7 @@
 // Base URL of the Flask API. Set VITE_API_URL in .env / Vercel project settings,
 // e.g. VITE_API_URL=https://api.yourdomain.com
 // @ts-ignore vite import.meta.env
-export const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:5175";
+export const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8000";
 
 export interface ContactPayload {
   name: string;

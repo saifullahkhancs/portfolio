@@ -47,6 +47,10 @@ def create_contact_message():
 @contact_bp.get("/api/contact")
 def list_contact_messages():
     """Simple listing endpoint, intended for the site owner (add auth before
-    exposing this publicly in production)."""
-    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    exposing this publicly in production).
+
+    Limits to the most recent 100 messages to avoid performance issues.
+    """
+    limit = int(request.args.get("limit", 100))
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).limit(limit).all()
     return jsonify([m.to_dict() for m in messages])

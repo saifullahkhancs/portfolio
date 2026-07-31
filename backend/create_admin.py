@@ -6,5 +6,6 @@ from app.models import User
 if len(sys.argv)!=3: raise SystemExit("Usage: python create_admin.py EMAIL PASSWORD")
 app=create_app()
 with app.app_context():
+    db.create_all()  # Ensure all tables exist before trying to create a user
     email=sys.argv[1].strip().lower(); user=User.query.filter_by(email=email).first() or User(email=email)
     user.set_password(sys.argv[2]); db.session.add(user); db.session.commit(); print(f"Admin ready: {email}")

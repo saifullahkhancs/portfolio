@@ -1,7 +1,15 @@
+"""
+Web Server Gateway Interface entrypoint.
+
+Gunicorn uses this to run the app in production.
+You can also run it directly for local development.
+"""
+
 from app import create_app
 
 app = create_app()
 
 if __name__ == "__main__":
-    # Frontend runs on 6175, backend on 5175 as requested
-    app.run(debug=True, host="0.0.0.0", port=5175)
+    # For local dev: `python wsgi.py`
+    # For prod: `gunicorn "wsgi:app"`
+    app.run(host="0.0.0.0", port=8000, debug=True)

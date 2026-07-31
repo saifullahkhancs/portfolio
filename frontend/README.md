@@ -4,8 +4,8 @@
 
 ```bash
 npm install
-cp .env.example .env   # set VITE_API_URL to your Flask backend (http://localhost:5175)
-npm run dev             # http://localhost:6175  (frontend), backend on 5175
+cp .env.example .env   # set VITE_API_URL to your Flask backend (http://localhost:8000)
+npm run dev             # http://localhost:5173  (frontend), backend on 8000
 ```
 
 - Frontend dev server: **http://localhost:6175**

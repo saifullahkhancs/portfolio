@@ -309,8 +309,8 @@ def main():
     )
     parser.add_argument(
         "--api-url",
-        default=os.environ.get("API_URL", "http://localhost:5175"),
-        help="Base URL of the backend (env: API_URL, default: http://localhost:5175)",
+        default=os.environ.get("API_URL", "http://localhost:8000"),
+        help="Base URL of the backend (env: API_URL, default: http://localhost:8000)",
     )
     parser.add_argument("--email", default=os.environ.get("ADMIN_EMAIL"), help="Admin email (env: ADMIN_EMAIL)")
     parser.add_argument("--password", default=os.environ.get("ADMIN_PASSWORD"), help="Admin password (env: ADMIN_PASSWORD)")
