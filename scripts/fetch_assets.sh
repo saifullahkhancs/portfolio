@@ -24,7 +24,7 @@ mkdir -p "$OUT"
 # "source-path-on-host|local-filename"
 declare -a ASSETS=(
   "f21d14cc-ba6a-4abe-b699-4f4e323f56a2/hero-banner.png|hero-banner.png"
-  "728ff80c-dbea-4bb8-b824-f88615386187/saifullah-portrait.jpeg|portrait.jpeg"
+  "728ff80c-dbea-4bb8-b824-f88615386187/saifullah-portrait.jpeg|portrait.png"
   "6d656b6e-0513-40c3-a30a-03fc6c99c836/Saifullah_Khan_Resume.pdf|resume.pdf"
   "66495578-9a67-4d94-aabf-ac2cc3472fec/cert-azure.png|cert-azure.png"
   "dca8e020-cad0-4cd9-970f-5f290ab7e18c/cert-hackerrank.png|cert-hackerrank.png"

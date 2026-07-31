@@ -28,7 +28,7 @@ from app.models import Profile, Experience, Project, SkillGroup, Education, Cert
 # script downloads from are kept in scripts/fetch_assets.sh.
 ASSETS = {
     "heroBanner": "/images/hero-banner.png",
-    "portrait": "/images/portrait.jpeg",
+    "portrait": "/images/portrait.png",
     "resume": "/images/resume.pdf",
     "certAzure": "/images/cert-azure.png",
     "certHackerrank": "/images/cert-hackerrank.png",
