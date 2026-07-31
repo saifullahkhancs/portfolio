@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: portfolio-db
+    restart: always
+    environment:
+      POSTGRES_USER: portfolio_user
+      POSTGRES_PASSWORD: portfolio_password
+      POSTGRES_DB: portfolio_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portfolio-backend
+    restart: always
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgresql://portfolio_user:portfolio_password@db:5432/portfolio_db
+      SECRET_KEY: dev-secret-key-change-in-production
+      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:80"
+      MAX_UPLOAD_MB: "100"
+    ports:
+      - "5175:8080"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Note: The browser accesses the backend. Thus, the URL must be localhost (external port),
+        # not the internal Docker service name "backend".
+        VITE_API_URL: http://localhost:5175
+    container_name: portfolio-frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
