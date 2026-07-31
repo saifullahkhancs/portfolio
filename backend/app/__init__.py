@@ -11,11 +11,10 @@ from .extensions import db, migrate
 # Load env vars *before* reading os.environ so that DATABASE_URL,
 # ALLOWED_ORIGINS, SECRET_KEY etc. from .env files actually take effect
 # (gunicorn / `python wsgi.py` don't load .env on their own).
-# backend/.env wins if both exist; the repo-root .env is the fallback.
 _BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 load_dotenv(os.path.join(".env"))
 
-_DEFAULT_ORIGINS = "http://localhost:5173"
+_DEFAULT_ORIGINS = "http://localhost:5173,http://localhost:5175,http://localhost:3000,http://localhost:6175"
 
 
 def _cors_origins() -> str | list[str]:
@@ -87,6 +86,9 @@ def create_app(config_object: str | None = None) -> Flask:
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # import models so that db.create_all sees them
+    from . import models as _models  # noqa: F401
+
     from .routes.contact import contact_bp
     from .routes.health import health_bp
     from .routes.auth import auth_bp
@@ -99,7 +101,54 @@ def create_app(config_object: str | None = None) -> Flask:
     app.register_blueprint(admin_bp)
     app.register_blueprint(portfolio_bp)
 
-    # Add request timing logs
+    # Auto-create tables on startup so that a fresh DB (postgres:15 in docker-compose)
+    # immediately shows tables in Table Editor without manual migration.
+    # This is safe to call multiple times – it only creates missing tables.
+    def _ensure_tables():
+        import sqlalchemy as sa
+        max_retries = 5
+        for attempt in range(1, max_retries + 1):
+            try:
+                with app.app_context():
+                    db.engine.connect().close()
+                    db.create_all()
+                    insp = sa.inspect(db.engine)
+                    tables = insp.get_table_names()
+                    app.logger.info(f"DB tables ensured: {tables}")
+                    try:
+                        from .models import Profile, Experience, Project
+                        p = db.session.query(Profile).count()
+                        e = db.session.query(Experience).count()
+                        pr = db.session.query(Project).count()
+                        app.logger.info(f"Seed status – profiles:{p} experiences:{e} projects:{pr}")
+                        if p == 0:
+                            app.logger.warning(
+                                "Profiles table empty – run `python seed.py --reset` or `python seed_via_api.py --reset` to populate."
+                            )
+                    except Exception as count_err:
+                        app.logger.warning(f"Could not count seed tables: {count_err}")
+                break
+            except Exception as exc:
+                app.logger.warning(f"DB not ready (attempt {attempt}/{max_retries}): {exc}")
+                if attempt == max_retries:
+                    app.logger.error(f"Failed to ensure DB tables after {max_retries} attempts: {exc}")
+                else:
+                    time.sleep(2)
+
+    # Run synchronously on startup if env var set (default true)
+    if os.environ.get("AUTO_CREATE_TABLES", "true").lower() in ("true", "1", "yes"):
+        try:
+            _ensure_tables()
+        except Exception as e:
+            app.logger.warning(f"Initial table creation deferred: {e}")
+
+        @app.before_request
+        def _ensure_tables_once():
+            if getattr(app, "_tables_ensured", False):
+                return
+            app._tables_ensured = True
+            _ensure_tables()
+
     @app.before_request
     def start_timer():
         g.start_time = time.monotonic()
@@ -113,6 +162,7 @@ def create_app(config_object: str | None = None) -> Flask:
                 f"Response: {response.status_code} in {duration:.4f}s for {request.method} {request.path}"
             )
         return response
+
     return app
 
 
@@ -122,10 +172,10 @@ def _normalize_db_url(url: str | None) -> str:
     - Replaces `postgres://` with `postgresql+psycopg://` to use the installed `psycopg` v3 driver.
     - This avoids the `ModuleNotFoundError: No module named 'psycopg2'` error.
     """
+    if not url:
+        return url
     if url.startswith("postgres://"):
         return url.replace("postgres://", "postgresql+psycopg://", 1)
-    # The raw psycopg driver also uses postgresql://, so we need to handle that too
-    # for cases where the user might provide it directly.
     if url.startswith("postgresql://") and not url.startswith("postgresql+psycopg://"):
         return url.replace("postgresql://", "postgresql+psycopg://", 1)
     return url

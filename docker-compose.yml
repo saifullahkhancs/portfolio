@@ -24,8 +24,9 @@ services:
       PORT: 8080
       DATABASE_URL: postgresql://portfolio_user:portfolio_password@db:5432/portfolio_db
       SECRET_KEY: dev-secret-key-change-in-production
-      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:80"
+      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:5175,http://localhost:3000,http://localhost:6175,http://localhost:80,http://localhost:5173"
       MAX_UPLOAD_MB: "100"
+      AUTO_CREATE_TABLES: "true"
     ports:
       - "5175:8080"
     depends_on:

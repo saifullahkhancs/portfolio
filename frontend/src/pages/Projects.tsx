@@ -3,7 +3,7 @@ import { PageHeader, SiteShell } from "@/components/SiteShell";
 import { Reveal } from "@/components/Reveal";
 import { TiltCard } from "@/components/TiltCard";
 import { ProjectIcons } from "@/components/ProjectIcons";
-import { getProjects, getProfile, type Project } from "@/lib/api";
+import { getProjects, getProfile, fallbackProjects, fallbackProfile, type Project } from "@/lib/api";
 
 function isDirectVideoUrl(value: string) {
   return /\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test((value || "").trim());
@@ -14,14 +14,19 @@ export default function Projects() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    getProjects().then(setProjects).catch(() => {});
-    getProfile().then(setProfile).catch(() => {});
+    getProjects()
+      .then(setProjects)
+      .catch(() => setProjects(fallbackProjects as any));
+    getProfile()
+      .then(setProfile)
+      .catch(() => setProfile(fallbackProfile as any));
   }, []);
 
-  const list = projects || [];
+  const list = (projects?.length ? projects : fallbackProjects) as any[];
+  const displayProfile = profile || fallbackProfile;
 
   return (
-    <SiteShell profile={profile}>
+    <SiteShell profile={displayProfile as any}>
       <PageHeader
         kicker="Build log"
         title="Projects"
@@ -29,7 +34,7 @@ export default function Projects() {
       />
       <div className="mx-auto grid max-w-5xl gap-4 px-6 py-16 sm:grid-cols-2">
         {list.map((p: any, i: number) => (
-          <Reveal key={p.name} delay={(i % 2) * 110 + Math.floor(i / 2) * 60}>
+          <Reveal key={p.name + i} delay={(i % 2) * 110 + Math.floor(i / 2) * 60}>
             <TiltCard>
               <article className="panel group relative flex h-full flex-col overflow-hidden p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/40 hover:shadow-[0_0_40px_-10px_var(--color-primary)]">
                 {/* shine sweep on hover */}

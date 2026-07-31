@@ -31,18 +31,23 @@ const packetClass =
   "packet absolute whitespace-nowrap rounded border border-primary/30 bg-background/95 px-1.5 py-0.5 font-mono text-[9px] text-primary shadow";
 
 export default function HeroAnimation({ name, title, desc }: { name: string; title: string; desc: string }) {
+  // Defensive: ensure strings even if backend returns null/undefined
+  const safeName = (name || "").trim() || "Saifullah Khan";
+  const safeTitle = (title || "").trim() || "Software Engineer";
+  const safeDesc = (desc || "").trim() || "Full Stack Developer building web applications, REST APIs, and data-driven systems.";
+
   const [phase, setPhase] = useState<Phase>("boot");
   const [titleChars, setTitleChars] = useState(0);
   const [nameChars, setNameChars] = useState(0);
   const [descWords, setDescWords] = useState(0);
 
-  const words = useMemo(() => desc.split(" ").filter(Boolean), [desc]);
-  const firstSpace = name.indexOf(" ");
+  const words = useMemo(() => safeDesc.split(" ").filter(Boolean), [safeDesc]);
+  const firstSpace = safeName.indexOf(" ");
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setTitleChars(title.length);
-      setNameChars(name.length);
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setTitleChars(safeTitle.length);
+      setNameChars(safeName.length);
       setDescWords(words.length);
       setPhase("done");
       return;
@@ -52,27 +57,33 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
     const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
 
     // staged typewriter: boot -> title -> name -> description -> done
-    let t = 950; // let the wires + computer fade in first
+    let t = 300; // reduced initial delay so page doesn't look blank
     at(t, () => setPhase("title"));
-    title.split("").forEach((_, i) => at(t + 60 + i * 26, () => setTitleChars(i + 1)));
-    t += 60 + title.length * 26 + 240;
+    safeTitle.split("").forEach((_, i) => at(t + 30 + i * 18, () => setTitleChars(i + 1)));
+    t += 30 + safeTitle.length * 18 + 180;
 
     at(t, () => setPhase("name"));
-    name.split("").forEach((_, i) => at(t + 60 + i * 55, () => setNameChars(i + 1)));
-    t += 60 + name.length * 55 + 260;
+    safeName.split("").forEach((_, i) => at(t + 30 + i * 35, () => setNameChars(i + 1)));
+    t += 30 + safeName.length * 35 + 180;
 
     at(t, () => setPhase("desc"));
-    words.forEach((_, i) => at(t + 80 + i * 30, () => setDescWords(i + 1)));
-    t += 80 + words.length * 30 + 120;
+    words.forEach((_, i) => at(t + 40 + i * 22, () => setDescWords(i + 1)));
+    t += 40 + words.length * 22 + 100;
 
     at(t, () => setPhase("done"));
     return () => timers.forEach(clearTimeout);
-  }, [name, title, words]);
+  }, [safeName, safeTitle, words]);
 
   const started = phase !== "boot";
-  const typedFirst = name.slice(0, firstSpace === -1 ? nameChars : Math.min(nameChars, firstSpace));
-  const typedLast = firstSpace === -1 ? "" : name.slice(firstSpace + 1, Math.max(firstSpace + 1, nameChars));
+  const typedFirst = safeName.slice(0, firstSpace === -1 ? nameChars : Math.min(nameChars, firstSpace));
+  const typedLast = firstSpace === -1 ? "" : safeName.slice(firstSpace + 1, Math.max(firstSpace + 1, nameChars));
   const showSpace = firstSpace !== -1 && nameChars > firstSpace;
+
+  // If animation hasn't started yet, show at least title + name instantly as fallback so page is never blank
+  const displayTitle = started ? safeTitle.slice(0, titleChars) : safeTitle;
+  const displayFirst = started ? typedFirst : safeName.slice(0, firstSpace === -1 ? safeName.length : firstSpace);
+  const displayLast = started ? typedLast : firstSpace === -1 ? "" : safeName.slice(firstSpace + 1);
+  const displayDesc = started ? words.slice(0, descWords).join(" ") : words.slice(0, Math.min(20, words.length)).join(" ");
 
   return (
     <div className="hero-machine relative">
@@ -80,18 +91,18 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
       <div className="flex min-h-[20px] items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
         <span
           className={`h-1.5 w-1.5 shrink-0 rounded-full bg-primary transition-opacity ${
-            phase === "title" ? "opacity-100 animate-[node-glow_0.9s_ease-in-out_infinite]" : started ? "opacity-70" : "opacity-0"
+            phase === "title" ? "opacity-100 animate-[node-glow_0.9s_ease-in-out_infinite]" : started ? "opacity-70" : "opacity-100"
           }`}
         />
-        <span>{title.slice(0, titleChars)}</span>
+        <span>{displayTitle}</span>
         {phase === "title" && <Caret />}
       </div>
 
       {/* ============ output #2 — name (single font for both parts) ============ */}
       <h1 className="mt-3 min-h-[5.6rem] font-mono text-4xl font-bold leading-[1.15] sm:min-h-[3.9rem] sm:text-5xl">
-        <span className="text-gradient">{typedFirst}</span>
-        {showSpace && " "}
-        <span className="text-gradient">{typedLast}</span>
+        <span className="text-gradient">{displayFirst}</span>
+        {showSpace || !started ? " " : ""}
+        <span className="text-gradient">{displayLast || (!started && firstSpace !== -1 ? safeName.slice(firstSpace + 1) : "")}</span>
         {phase === "name" && <Caret big />}
       </h1>
 
@@ -145,17 +156,13 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
           >
             {/* screen */}
             <div className="absolute inset-[3px] overflow-hidden rounded-[3px] bg-[#0c1526]">
-              {started && (
-                <>
-                  <div className="absolute left-1.5 top-1 space-y-[3px]">
-                    <span className="block h-[3px] w-8 rounded-full bg-primary/60" />
-                    <span className="block h-[3px] w-5 rounded-full bg-accent/50" />
-                    <span className="block h-[3px] w-7 rounded-full bg-primary/40" />
-                  </div>
-                  {/* scanning bar while extracting */}
-                  <span className="absolute top-0 h-full w-[3px] bg-primary/30 animate-[screen-scan_1.6s_ease-in-out_infinite]" />
-                </>
-              )}
+              <div className="absolute left-1.5 top-1 space-y-[3px]">
+                <span className="block h-[3px] w-8 rounded-full bg-primary/60" />
+                <span className="block h-[3px] w-5 rounded-full bg-accent/50" />
+                <span className="block h-[3px] w-7 rounded-full bg-primary/40" />
+              </div>
+              {/* scanning bar while extracting */}
+              <span className="absolute top-0 h-full w-[3px] bg-primary/30 animate-[screen-scan_1.6s_ease-in-out_infinite]" />
             </div>
           </div>
           {/* stand + base */}
@@ -170,7 +177,7 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
       </div>
 
       {/* ============ output #3 — description terminal box ============ */}
-      <div className="relative min-h-[336px] overflow-hidden rounded-xl border border-border bg-surface/70 shadow-inner">
+      <div className="relative min-h-[200px] overflow-hidden rounded-xl border border-border bg-surface/70 shadow-inner">
         <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">extracted_output.txt</span>
           <span className="flex gap-1.5">
@@ -180,8 +187,9 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
           </span>
         </div>
         <p className="p-4 text-sm leading-relaxed text-muted-foreground">
-          {words.slice(0, descWords).join(" ")}
+          {displayDesc}
           {phase === "desc" && <Caret />}
+          {!started && words.length > 20 ? "..." : ""}
         </p>
         {/* scanning shimmer while the description is being extracted */}
         {phase === "desc" && (

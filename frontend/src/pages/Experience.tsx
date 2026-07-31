@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
 import { Reveal } from "@/components/Reveal";
-import { getExperiences, type Experience as ExpType, getProfile } from "@/lib/api";
+import { getExperiences, getProfile, fallbackExperiences, fallbackProfile, type Experience as ExpType } from "@/lib/api";
 
 /**
  * Experience deck: cards start stacked with the first in front.
@@ -11,7 +11,7 @@ import { getExperiences, type Experience as ExpType, getProfile } from "@/lib/ap
 function ExperienceDeck({ jobs }: { jobs: any[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
-  const n = jobs.length;
+  const n = Math.max(jobs.length, 1);
 
   useEffect(() => {
     let raf = 0;
@@ -37,9 +37,18 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
     };
   }, []);
 
+  if (!jobs.length) {
+    return (
+      <div className="mx-auto max-w-5xl px-6 py-16">
+        <p className="text-sm text-muted-foreground">No experiences to display.</p>
+      </div>
+    );
+  }
+
   // continuous "front card" position: 0 -> n-1 as you scroll through the section
   const active = progress * (n - 1);
   const current = Math.round(active);
+  const safeCurrent = Math.min(Math.max(current, 0), jobs.length - 1);
 
   const jumpTo = (i: number) => {
     const el = sectionRef.current;
@@ -50,7 +59,7 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
   };
 
   return (
-    <div ref={sectionRef} className="relative" style={{ height: `${Math.max(n, 2) * 110 + 40}vh` }}>
+    <div ref={sectionRef} className="relative" style={{ height: `${Math.max(jobs.length, 2) * 110 + 40}vh` }}>
       <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden">
         <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           scroll — the deck rotates
@@ -74,7 +83,7 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
             }
             return (
               <article
-                key={`${job.company}-${job.role}-${job.id || job.period}`}
+                key={`${job.company}-${job.role}-${job.id || i}`}
                 className="panel absolute inset-0 flex flex-col overflow-hidden"
                 style={{
                   transform,
@@ -113,8 +122,8 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
         <div className="mt-8 flex items-center gap-4">
           <button
             type="button"
-            onClick={() => jumpTo(Math.max(0, current - 1))}
-            disabled={current === 0}
+            onClick={() => jumpTo(Math.max(0, safeCurrent - 1))}
+            disabled={safeCurrent === 0}
             aria-label="Previous role"
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface/80 font-mono text-sm text-primary transition-colors hover:border-primary/60 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-35"
           >
@@ -122,23 +131,23 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
           </button>
 
           <div className="flex items-center gap-3">
-          {jobs.map((job: any, i: number) => (
-            <button
-              key={job.company}
-              type="button"
-              onClick={() => jumpTo(i)}
-              aria-label={`Go to ${job.company}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === current ? "w-8 bg-primary" : "w-2 bg-muted hover:bg-muted-foreground"
-              }`}
-            />
-          ))}
+            {jobs.map((job: any, i: number) => (
+              <button
+                key={job.company + i}
+                type="button"
+                onClick={() => jumpTo(i)}
+                aria-label={`Go to ${job.company}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === safeCurrent ? "w-8 bg-primary" : "w-2 bg-muted hover:bg-muted-foreground"
+                }`}
+              />
+            ))}
           </div>
 
           <button
             type="button"
-            onClick={() => jumpTo(Math.min(n - 1, current + 1))}
-            disabled={current >= n - 1}
+            onClick={() => jumpTo(Math.min(n - 1, safeCurrent + 1))}
+            disabled={safeCurrent >= n - 1}
             aria-label="Next role"
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface/80 font-mono text-sm text-primary transition-colors hover:border-primary/60 hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-35"
           >
@@ -146,7 +155,7 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
           </button>
         </div>
         <p className="mt-3 font-mono text-xs text-muted-foreground">
-          {(jobs[current] as any)?.company} — {current + 1} of {n}
+          {(jobs[safeCurrent] as any)?.company || ""} — {safeCurrent + 1} of {jobs.length}
         </p>
       </div>
     </div>
@@ -155,11 +164,18 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
 
 /** simple fallback list when the user prefers reduced motion */
 function ExperienceList({ jobs }: { jobs: any[] }) {
+  if (!jobs.length) {
+    return (
+      <div className="mx-auto max-w-5xl px-6 py-16">
+        <p className="text-sm text-muted-foreground">No experiences to display.</p>
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <ol className="relative space-y-6 border-l border-border pl-6">
-        {jobs.map((job: any) => (
-          <li key={`${job.company}-${job.role}`} className="relative">
+        {jobs.map((job: any, idx: number) => (
+          <li key={`${job.company}-${job.role}-${idx}`} className="relative">
             <span className="absolute -left-[1.9rem] top-6 h-2.5 w-2.5 rounded-full bg-primary" />
             <Reveal>
               <div className="panel p-6">
@@ -189,23 +205,38 @@ export default function Experience() {
   const [experiences, setExperiences] = useState<ExpType[] | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [reduced, setReduced] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getExperiences().then(setExperiences).catch(() => {});
-    getProfile().then(setProfile).catch(() => {});
+    getExperiences()
+      .then(setExperiences)
+      .catch(() => setExperiences(fallbackExperiences as any))
+      .finally(() => setLoading(false));
+    getProfile()
+      .then(setProfile)
+      .catch(() => setProfile(fallbackProfile as any));
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  const list = experiences || [];
+  const list = (experiences?.length ? experiences : fallbackExperiences) as any[];
+  const displayProfile = profile || fallbackProfile;
 
   return (
-    <SiteShell profile={profile}>
+    <SiteShell profile={displayProfile as any}>
       <PageHeader
         kicker="Career"
         title="Experience"
         intro="Three years building backend services, ingestion pipelines and APIs across security intelligence, business workflow and networking research teams."
       />
-      {reduced ? <ExperienceList jobs={list as any[]} /> : <ExperienceDeck jobs={list as any[]} />}
+      {loading && !experiences ? (
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <p className="font-mono text-sm text-muted-foreground">Loading experience…</p>
+        </div>
+      ) : reduced ? (
+        <ExperienceList jobs={list} />
+      ) : (
+        <ExperienceDeck jobs={list} />
+      )}
     </SiteShell>
   );
 }
