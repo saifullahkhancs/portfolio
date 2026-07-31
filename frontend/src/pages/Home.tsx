@@ -81,12 +81,6 @@ export default function Home() {
     };
   }, []);
 
-  /* While the API call is in flight, show the full-page loader so the user
-     never sees hardcoded / fallback data flash before the real data arrives. */
-  if (loading && !data) {
-    return <PageLoader />;
-  }
-
   const source = useMemo(() => data || (fallbackPortfolio as PortfolioData), [data]);
   const profile = source?.profile || (fallbackPortfolio.profile as any);
   const skills = (source?.skills?.length ? source.skills : source?.skill_groups?.length ? source.skill_groups : fallbackPortfolio.skills) as any[];
@@ -98,6 +92,12 @@ export default function Home() {
   const heroBanner = (profile?.hero_banner_url as string) || "";
   const resumeUrl = (profile?.resume_url as string) || "";
   const firstExp = (experience?.[0] || null) as any;
+
+  /* While the API call is in flight, show the full-page loader so the user
+     never sees hardcoded / fallback data flash before the real data arrives. */
+  if (loading && !data) {
+    return <PageLoader />;
+  }
 
   return (
     <SiteShell profile={profile}>
