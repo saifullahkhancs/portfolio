@@ -23,8 +23,8 @@ export default function Experience() {
       />
       <div className="mx-auto max-w-5xl px-6 py-16">
         <ol className="relative space-y-6 border-l border-border pl-6">
-          {list.map((job: any) => (
-            <li key={`${job.company}-${job.role}-${job.id || job.period}`} className="relative">
+          {list.map((job: any, idx: number) => (
+            <li key={`${job.company}-${job.role}-${job.id || job.period}`} className={`relative transition-all duration-700 ${idx === 0 ? "translate-x-0 opacity-100" : idx === 1 ? "translate-x-4 opacity-60 scale-[0.98]" : "translate-x-8 opacity-40 scale-[0.96]"}`}>
               <span className="absolute -left-[1.9rem] top-6 h-2.5 w-2.5 rounded-full bg-primary" />
               <div className="panel p-6">
                 <p className="font-mono text-xs text-muted-foreground">

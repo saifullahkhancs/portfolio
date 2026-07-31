@@ -34,25 +34,7 @@ export default function IDCard({ profile }: Props) {
   const isSwaying = stage === "swaying";
 
   return (
-    <div className="relative mx-auto h-[420px] w-[260px] select-none md:mx-0 md:ml-auto">
-      {/* Nail / pin appears only when the falling card reaches its resting position. */}
-      <div
-        className={`absolute left-1/2 top-0 z-30 -translate-x-1/2 transition-opacity duration-200 ${
-          isCaught ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="relative flex flex-col items-center">
-          {/* metallic head */}
-          <div className="h-4 w-4 rounded-full border-2 border-zinc-300 bg-zinc-100 shadow-[0_1px_4px_rgba(0,0,0,0.5),inset_0_1px_1px_white]" />
-          {/* blue thumbtack */}
-          <div className="absolute left-1/2 top-[2px] h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.7)]" />
-          {/* shaft going into wall */}
-          <div className="mt-[-2px] h-3 w-[3px] rounded-b-full bg-gradient-to-r from-zinc-400 via-zinc-200 to-zinc-500" />
-          {/* subtle highlight */}
-          <div className="pointer-events-none absolute left-1/2 top-1 h-8 w-8 -translate-x-1/2 rounded-full bg-white/10 blur-[6px]" />
-        </div>
-      </div>
-
+    <div className="relative mx-auto h-[320px] w-[260px] select-none md:mx-0 md:ml-auto md:translate-x-6">
       {/* Impact ring */}
       <div
         className={`pointer-events-none absolute left-1/2 top-[42px] z-10 h-6 w-6 -translate-x-1/2 rounded-full border border-primary/60 transition-all duration-500 ${
@@ -113,7 +95,7 @@ export default function IDCard({ profile }: Props) {
               <div className="pointer-events-none absolute inset-x-0 top-0 h-[50%] rounded-t-[10px] bg-gradient-to-b from-white to-transparent opacity-80" />
 
               {/* portrait */}
-              <div className="relative mx-auto mt-2 h-[158px] w-[158px] overflow-hidden rounded-full border-[3px] border-white bg-zinc-200 shadow-[0_4px_18px_rgba(0,0,0,0.15)]">
+              <div className="relative mx-auto mt-2 h-[200px] w-[180px] overflow-hidden rounded-[6px] border-[3px] border-white bg-zinc-200 shadow-[0_4px_18px_rgba(0,0,0,0.15)]">
                 <img
                   src={p.profile_image_url || assets.portrait}
                   alt={p.name || "Portrait"}

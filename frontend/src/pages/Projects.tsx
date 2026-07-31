@@ -28,7 +28,7 @@ export default function Projects() {
       />
       <div className="mx-auto grid max-w-5xl gap-4 px-6 py-16 sm:grid-cols-2">
         {list.map((p: any) => (
-          <article key={p.name} className="panel flex flex-col p-6">
+          <article key={p.name} className="panel flex flex-col p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_40px_-10px_var(--color-primary)] hover:border-primary/40">
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-xl font-semibold">{p.name}</h2>
               <span className="font-mono text-[0.7rem] text-muted-foreground">{p.period}</span>
