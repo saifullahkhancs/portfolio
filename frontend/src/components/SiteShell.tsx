@@ -1,7 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { Profile } from "@/lib/api";
-import { ApiDebug } from "@/components/ApiDebug";
+
 
 const nav = [
   { to: "/", label: "home" },
@@ -49,7 +49,7 @@ export function SiteShell({ children, profile }: { children: ReactNode; profile?
 
       <main>{children}</main>
 
-      <ApiDebug />
+
 
       <footer className="mt-24 border-t border-border">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-8 font-mono text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
