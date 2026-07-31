@@ -46,9 +46,30 @@ export default function CertCarousel({
   const go = (dir: number) => setActive((a) => (a + dir + n) % n);
   const current = items[active];
 
+  const arrow =
+    "absolute top-1/2 z-[60] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 font-mono text-lg text-primary shadow-lg backdrop-blur transition-all duration-200 hover:scale-110 hover:border-primary/60 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+
   return (
     <div className="select-none">
       <div className="relative mx-auto h-[330px] w-full max-w-3xl" style={{ perspective: "1200px" }}>
+        {/* prev / next — pinned to the left & right sides, centred on the ring */}
+        <button
+          type="button"
+          onClick={() => go(-1)}
+          aria-label="Previous certificate"
+          className={`${arrow} left-1 sm:-left-2 lg:-left-20`}
+        >
+          &lt;
+        </button>
+        <button
+          type="button"
+          onClick={() => go(1)}
+          aria-label="Next certificate"
+          className={`${arrow} right-1 sm:-right-2 lg:-right-20`}
+        >
+          &gt;
+        </button>
+
         {items.map((c, i) => {
           const d = offset(i);
           const abs = Math.abs(d);
@@ -103,39 +124,19 @@ export default function CertCarousel({
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{current.detail}</p>
       </div>
 
-      {/* < / > controls + dots */}
-      <div className="mt-6 flex items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={() => go(-1)}
-          aria-label="Previous certificate"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface/80 font-mono text-sm text-primary transition-colors hover:border-primary/60 hover:bg-primary/10"
-        >
-          &lt;
-        </button>
-
-        <div className="flex items-center gap-2">
-          {items.map((c, i) => (
-            <button
-              key={`dot-${c.name}`}
-              type="button"
-              onClick={() => setActive(i)}
-              aria-label={`Show ${c.name}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? "w-8 bg-primary" : "w-2 bg-muted hover:bg-muted-foreground"
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => go(1)}
-          aria-label="Next certificate"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface/80 font-mono text-sm text-primary transition-colors hover:border-primary/60 hover:bg-primary/10"
-        >
-          &gt;
-        </button>
+      {/* dots — the < / > arrows live on the sides of the ring */}
+      <div className="mt-6 flex items-center justify-center gap-2">
+        {items.map((c, i) => (
+          <button
+            key={`dot-${c.name}`}
+            type="button"
+            onClick={() => setActive(i)}
+            aria-label={`Show ${c.name}`}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === active ? "w-8 bg-primary" : "w-2 bg-muted hover:bg-muted-foreground"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

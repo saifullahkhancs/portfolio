@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { assets, profile as staticProfile } from "@/data/portfolio";
 import type { Profile } from "@/lib/api";
 
@@ -9,6 +9,17 @@ interface Props {
 /**
  * ID badge hanging from two white lanyard strips (no pin).
  * ~80% rectangular photo, ~20% contact strip (ID + phone + email).
+ *
+ * The drop does NOT start on mount — the profile picture is loaded
+ * first and only once it is ready does the card drop in from above
+ * the screen, settle, and start swaying.
+ *
+ * Lanyard geometry (so the strip ends really meet the card):
+ *  - strips: 112px long, rotated ±31deg about the single top pivot
+ *      -> their tips land at (±58px, 96px) measured from the pivot
+ *  - the card overlaps the strip container by 6px (-mt-[6px])
+ *      -> the tips sit 6px inside the card top edge
+ *  - the punch holes and brass rivets are centred exactly on the tips
  */
 export default function IDCard({ profile }: Props) {
   const p = profile || {
@@ -16,6 +27,32 @@ export default function IDCard({ profile }: Props) {
     phone: staticProfile.phone,
     profile_image_url: assets.portrait,
   } as any;
+
+  // the picture the card wants to show (API url first, bundled portrait fallback)
+  const wanted = p.profile_image_url || assets.portrait;
+  const [src, setSrc] = useState(wanted);
+  const [ready, setReady] = useState(false); // picture fully loaded -> card may drop
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    setSrc(wanted);
+    setReady(false);
+  }, [wanted]);
+
+  useEffect(() => {
+    // if the (cached) image finished before React attached the load listener,
+    // fall back to checking it directly — both success and hard failure
+    if (ready || !src) return;
+    const el = imgRef.current;
+    if (!el || !el.complete) return;
+    if (el.naturalWidth > 0) {
+      setReady(true);
+    } else if (src !== assets.portrait) {
+      setSrc(assets.portrait); // url failed -> use the bundled portrait directly
+    } else {
+      setReady(true); // even the fallback failed -> drop anyway, show the contact strip
+    }
+  }, [ready, src]);
 
   // stable random badge id (generated once, not on every render)
   const badgeId = useMemo(() => `SF-${Math.floor(10000 + Math.random() * 89999)}`, []);
@@ -28,18 +65,34 @@ export default function IDCard({ profile }: Props) {
       className="relative mx-auto w-[340px] select-none md:mx-0 md:ml-auto md:translate-x-6 lg:translate-x-10"
       aria-label="ID badge"
     >
-      {/* Drop from above on load (settles with a bounce) then continuous sway */}
-      <div className="origin-top animate-[lanyard-drop_1.5s_ease-out_forwards]">
-        <div className="origin-top animate-[lanyard-sway_5.5s_ease-in-out_1.5s_infinite]">
-        {/* lanyard strips forming a clean V from one pivot point at the top */}
+      {/* hidden until the picture is loaded, then a full drop from above the
+          screen that settles with two little bounces (motion-safe) */}
+      <div
+        className={
+          ready
+            ? "origin-top animate-[lanyard-drop_1.7s_linear_forwards] motion-reduce:animate-none"
+            : "origin-top opacity-0"
+        }
+      >
+        {/* the sway only mounts together with the drop, its delay (1.7s) equals
+            the drop duration and it loops through 0deg, so drop → swing is seamless */}
+        <div
+          className={
+            ready
+              ? "origin-top animate-[lanyard-sway_5.5s_ease-in-out_1.7s_infinite] motion-reduce:animate-none"
+              : "origin-top"
+          }
+        >
+        {/* lanyard strips forming a clean V from one pivot point at the top;
+            tips land exactly at (±58px, 96px) where the rivets clamp them to the card */}
         <div className="relative z-20 h-[96px]">
           <div className="absolute left-1/2 top-0 h-[112px] w-[7px] origin-top -translate-x-1/2 -rotate-[31deg] rounded-full bg-gradient-to-b from-white via-zinc-100 to-zinc-200 shadow-[0_4px_12px_rgba(0,0,0,0.2)]" />
           <div className="absolute left-1/2 top-0 h-[112px] w-[7px] origin-top -translate-x-1/2 rotate-[31deg] rounded-full bg-gradient-to-b from-white via-zinc-100 to-zinc-200 shadow-[0_4px_12px_rgba(0,0,0,0.2)]" />
           {/* the pivot ring where both strips meet */}
           <span className="absolute left-1/2 top-[-6px] h-3 w-3 -translate-x-1/2 rounded-full border-2 border-primary/80 bg-background" />
-          {/* brass rivets where the strips meet the card */}
-          <span className={`${rivet} left-[calc(50%-58px)] top-[88px]`} />
-          <span className={`${rivet} left-[calc(50%+58px)] top-[88px]`} />
+          {/* brass rivets clamping the strip ends onto the card (centred on the tips) */}
+          <span className={`${rivet} left-[calc(50%-63px)] top-[91px]`} />
+          <span className={`${rivet} left-[calc(50%+53px)] top-[91px]`} />
         </div>
 
         {/* the card itself */}
@@ -47,14 +100,22 @@ export default function IDCard({ profile }: Props) {
           {/* photo — most of the card, rectangular, framed from the top so the head is never cut */}
           <div className="relative h-[360px] w-full bg-zinc-200">
             <img
-              src={p.profile_image_url || assets.portrait}
+              ref={imgRef}
+              src={src}
               alt="Profile"
               className="h-full w-full object-cover object-top"
               loading="eager"
+              fetchPriority="high"
+              onLoad={() => setReady(true)}
+              onError={() => {
+                // url failed -> use the bundled portrait directly
+                if (src !== assets.portrait) setSrc(assets.portrait);
+                else setReady(true);
+              }}
             />
-            {/* punch holes behind the rivets */}
-            <span className="absolute left-[calc(50%-58px)] top-[4px] h-2 w-2 rounded-full bg-black/25 ring-1 ring-black/40" />
-            <span className="absolute right-[calc(50%-58px)] top-[4px] h-2 w-2 rounded-full bg-black/25 ring-1 ring-black/40" />
+            {/* punch holes behind the rivets (centred on the strip tips, 6px from the card top) */}
+            <span className="absolute left-[calc(50%-62px)] top-[2px] h-2 w-2 rounded-full bg-black/25 ring-1 ring-black/40" />
+            <span className="absolute left-[calc(50%+54px)] top-[2px] h-2 w-2 rounded-full bg-black/25 ring-1 ring-black/40" />
           </div>
 
           {/* contact strip — only ID / phone / email */}
