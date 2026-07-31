@@ -56,16 +56,16 @@ export default function IDCard({ profile }: Props) {
       <div
         className={
           ready
-            ? "origin-top animate-[lanyard-drop_2.8s_linear_forwards] motion-reduce:animate-none"
+            ? "origin-top animate-[lanyard-drop_4.8s_linear_forwards] motion-reduce:animate-none"
             : "origin-top opacity-0"
         }
       >
         <div
-          className={
-            ready
-              ? "origin-top animate-[lanyard-sway_8s_ease-in-out_2.8s_infinite] motion-reduce:animate-none"
-              : "origin-top"
-          }
+        className={
+          ready
+            ? "origin-top animate-[lanyard-sway_8s_ease-in-out_4.8s_infinite] motion-reduce:animate-none"
+            : "origin-top"
+        }
         >
           <div className="relative z-20 h-[96px]">
             <div className="absolute left-1/2 top-0 h-[112px] w-[7px] origin-top -translate-x-1/2 -rotate-[31deg] rounded-full bg-gradient-to-b from-white via-zinc-100 to-zinc-200 shadow-[0_4px_12px_rgba(0,0,0,0.2)]" />

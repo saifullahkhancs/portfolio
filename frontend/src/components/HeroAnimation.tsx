@@ -11,8 +11,30 @@ import { useEffect, useMemo, useState } from "react";
  * profile card on the right) — only the reveal is animated.
  */
 
-const LEFT_PACKETS = ["Python", "FastAPI", "Flask", "Django"];
-const RIGHT_PACKETS = ["React", ".NET", "Kafka", "SQL"];
+/**
+ * Stop-words removed when extracting packet labels from free text so the
+ * floating labels stay short and meaningful.
+ */
+const STOP_WORDS = new Set([
+  "the","a","an","and","or","but","of","to","in","on","at","for","with","as","by",
+  "is","are","was","were","be","been","being","it","its","this","that","from","into",
+  "across","over","using","use","using","via","plus","about","also","than","then",
+  "not","no","so","if","my","i","we","you","they","he","she","our","their","has","have",
+]);
+
+/**
+ * Extract short, readable tokens from a free-text string (title or description).
+ * Returns up to `max` unique words with the first letter capitalised.
+ */
+function extractWords(text: string, max: number): string[] {
+  return (text || "")
+    .split(/[^A-Za-z0-9+#.\-']+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 2 && !STOP_WORDS.has(w.toLowerCase()))
+    .map((w) => (w[0].toUpperCase() + w.slice(1)).replace(/['"]$/, ""))
+    .filter((w, i, arr) => arr.indexOf(w) === i)
+    .slice(0, max);
+}
 
 type Phase = "boot" | "title" | "name" | "desc" | "done";
 
@@ -43,6 +65,19 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
 
   const words = useMemo(() => safeDesc.split(" ").filter(Boolean), [safeDesc]);
   const firstSpace = safeName.indexOf(" ");
+
+  // Packets flowing toward the computer carry real info from the profile:
+  // name tokens, title tokens, and keywords extracted from the description.
+  const leftPackets = useMemo(() => {
+    const nameWords = safeName.split(/\s+/).filter(Boolean);
+    const titleWords = extractWords(safeTitle, 4);
+    return [...nameWords, ...titleWords].filter((v, i, a) => a.indexOf(v) === i).slice(0, 6);
+  }, [safeName, safeTitle]);
+
+  const rightPackets = useMemo(() => {
+    const descWords = extractWords(safeDesc, 8);
+    return descWords.slice(0, 6);
+  }, [safeDesc]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -112,11 +147,11 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
         <div className="absolute left-0 right-[calc(50%+32px)] top-[46px] h-px bg-gradient-to-r from-transparent via-primary/30 to-primary/60" />
         <div className="absolute left-[calc(50%+32px)] right-0 top-[46px] h-px bg-gradient-to-l from-transparent via-primary/30 to-primary/60" />
 
-        {/* packets travelling the left wire, into the computer */}
+        {/* packets travelling the left wire, into the computer — carry name & title words */}
         <div className="absolute left-0 right-[calc(50%+36px)] top-[46px]">
-          {LEFT_PACKETS.map((w, i) => (
+          {leftPackets.map((w, i) => (
             <span
-              key={w}
+              key={`${w}-${i}`}
               className={`${packetClass} animate-[packet-travel_4s_linear_infinite]`}
               style={{ animationDuration: `${(4.2 + i * 0.8).toFixed(1)}s`, animationDelay: `${(i * 1.35).toFixed(1)}s` }}
             >
@@ -125,11 +160,11 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
           ))}
         </div>
 
-        {/* packets travelling the right wire, into the computer */}
+        {/* packets travelling the right wire, into the computer — carry description keywords */}
         <div className="absolute left-[calc(50%+36px)] right-0 top-[46px]">
-          {RIGHT_PACKETS.map((w, i) => (
+          {rightPackets.map((w, i) => (
             <span
-              key={w}
+              key={`${w}-${i}`}
               className={`${packetClass} animate-[packet-travel_4s_linear_infinite]`}
               style={{
                 animationDuration: `${(4.6 + i * 0.7).toFixed(1)}s`,

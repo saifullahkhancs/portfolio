@@ -11,6 +11,51 @@ import HeroAnimation from "@/components/HeroAnimation";
 import CertCarousel from "@/components/CertCarousel";
 import { getPortfolio, type Education, type PortfolioData, fallbackPortfolio } from "@/lib/api";
 
+/* ------------------------------------------------------------------ */
+/*  Full-page loader — shown while the backend data is being fetched   */
+/* ------------------------------------------------------------------ */
+function PageLoader() {
+  return (
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 bg-background">
+      {/* Terminal-style loading animation */}
+      <div className="relative">
+        {/* Outer ring */}
+        <div className="h-20 w-20 rounded-full border-2 border-border" />
+        {/* Spinning arc */}
+        <div className="absolute inset-0 h-20 w-20 animate-spin rounded-full border-2 border-transparent border-t-primary" style={{ animationDuration: "1.2s" }} />
+        {/* Inner pulse */}
+        <div className="absolute inset-3 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full bg-primary/20 animate-[node-glow_1.4s_ease-in-out_infinite]" />
+        </div>
+      </div>
+
+      {/* Terminal text */}
+      <div className="flex flex-col items-center gap-2">
+        <div className="font-mono text-sm text-primary flex items-center gap-2">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-[node-glow_0.9s_ease-in-out_infinite]" />
+          <span>Fetching portfolio data</span>
+          <span className="inline-block animate-[caret-blink_0.85s_steps(1)_infinite] h-[1em] w-[0.5em] bg-primary rounded-[2px]" />
+        </div>
+        <p className="font-mono text-xs text-muted-foreground">loading from server…</p>
+      </div>
+
+      {/* Animated data stream bars */}
+      <div className="flex items-end gap-1">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span
+            key={i}
+            className="block w-1.5 rounded-full bg-primary/60"
+            style={{
+              height: `${12 + i * 4}px`,
+              animation: `loader-bar 1.2s ease-in-out ${i * 0.15}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [data, setData] = useState<PortfolioData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +80,12 @@ export default function Home() {
       mounted = false;
     };
   }, []);
+
+  /* While the API call is in flight, show the full-page loader so the user
+     never sees hardcoded / fallback data flash before the real data arrives. */
+  if (loading && !data) {
+    return <PageLoader />;
+  }
 
   const source = useMemo(() => data || (fallbackPortfolio as PortfolioData), [data]);
   const profile = source?.profile || (fallbackPortfolio.profile as any);
@@ -93,7 +144,6 @@ export default function Home() {
                   Download résumé
                 </a>
               ) : null}
-              {loading && <span className="ml-2 self-center text-xs text-muted-foreground">syncing from backend…</span>}
               {error && !loading && (
                 <span className="ml-2 self-center text-xs text-amber-500">backend offline – showing cached portfolio</span>
               )}
