@@ -55,7 +55,7 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
         </div>
       </div>
 
-      <style jsx global>{`
+      <style>{`
         @keyframes packetFall {
           0% { transform: translateY(-30px); opacity: 0; }
           15% { opacity: 1; }
