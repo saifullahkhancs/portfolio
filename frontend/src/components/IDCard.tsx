@@ -28,11 +28,10 @@ export default function IDCard({ profile }: Props) {
   const [src, setSrc] = useState(wanted);
   const [ready, setReady] = useState(!wanted); // drop immediately if no image
   const imgRef = useRef<HTMLImageElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     setSrc(wanted);
-    setReady(false);
+    setReady(!wanted);
   }, [wanted]);
 
   useEffect(() => {
