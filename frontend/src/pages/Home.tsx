@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SiteShell } from "@/components/SiteShell";
-import { profile as staticProfile, skills as staticSkills, experience as staticExp, projects as staticProjects, education as staticEdu, certifications as staticCerts, assets as staticAssets } from "@/data/portfolio";
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
 import { ProjectIcons } from "@/components/ProjectIcons";
@@ -11,12 +10,6 @@ import IDCard from "@/components/IDCard";
 import HeroAnimation from "@/components/HeroAnimation";
 import CertCarousel from "@/components/CertCarousel";
 import { getPortfolio, type PortfolioData } from "@/lib/api";
-
-const certImages: Record<string, string> = {
-  javascript: staticAssets.certJavascript,
-  azure: staticAssets.certAzure,
-  hackerrank: staticAssets.certHackerrank,
-};
 
 export default function Home() {
   const [data, setData] = useState<PortfolioData | null>(null);
@@ -30,30 +23,15 @@ export default function Home() {
   }, []);
 
   // fallbacks
-  const profile = data?.profile || {
-    name: staticProfile.name,
-    title: staticProfile.role,
-    role: staticProfile.role,
-    description: staticProfile.summary,
-    summary: staticProfile.summary,
-    email: staticProfile.email,
-    phone: staticProfile.phone,
-    location: staticProfile.location,
-    linkedin: staticProfile.linkedin,
-    github: staticProfile.github,
-    profile_image_url: staticAssets.portrait,
-    hero_banner_url: staticAssets.heroBanner,
-    resume_url: staticAssets.resume,
-  } as any;
+  const profile = data?.profile || ({} as any);
+  const skills = (data?.skills || []) as any[];
+  const experience = data?.experiences || [];
+  const projects = data?.projects || [];
+  const education = data?.education || data?.educations?.[0] || null;
+  const certifications = data?.certifications || [];
 
-  const skills = (data?.skills && data.skills.length ? data.skills : staticSkills.map((s: any, i: number) => ({ id: i, group: s.group, group_name: s.group, items: s.items, sort_order: i }))) as any[];
-  const experience = data?.experiences?.length ? data.experiences : staticExp;
-  const projects = data?.projects?.length ? data.projects : staticProjects;
-  const education = (data?.education || data?.educations?.[0] || staticEdu) as any;
-  const certifications = data?.certifications?.length ? data.certifications : staticCerts;
-
-  const heroBanner = (profile.hero_banner_url as string) || staticAssets.heroBanner;
-  const resumeUrl = (profile.resume_url as string) || staticAssets.resume;
+  const heroBanner = (profile?.hero_banner_url as string) || "";
+  const resumeUrl = (profile?.resume_url as string) || "";
 
   return (
     <SiteShell profile={profile}>
@@ -75,7 +53,7 @@ export default function Home() {
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.4fr)_360px] lg:gap-14">
           <div>
-          <HeroAnimation name={profile.name || staticProfile.name} title={profile.title || profile.role} desc={profile.description || profile.summary} />
+          <HeroAnimation name={profile?.name || ""} title={profile?.title || profile?.role || ""} desc={profile?.description || profile?.summary || ""} />
 
             <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: '300ms' }}>
               <Link
@@ -106,7 +84,7 @@ export default function Home() {
             {[
               ["Experience", "3+ years engineering"],
               ["Focus", "APIs · microservices · full stack"],
-              ["Based in", profile.location],
+              ["Based in", profile?.location || ""],
             ].map(([k, v]) => (
               <div key={k}>
                 <dt className="text-xs uppercase tracking-widest text-muted-foreground">{k}</dt>
@@ -216,7 +194,7 @@ export default function Home() {
           <div className="mt-10">
             <CertCarousel
               items={certifications as any[]}
-              imageFor={(c: any) => c.image_url || certImages[c.image_key || c.image || ""] || ""}
+              imageFor={(c: any) => c.image_url || ""}
             />
           </div>
         </Reveal>

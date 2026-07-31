@@ -236,6 +236,12 @@
   }
 }
 
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* Full drop from above the screen: gravity accelerates the fall,
    the card lands, bounces twice with decaying height, then rests.
    The per-keyframe easing functions shape each segment. */

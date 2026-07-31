@@ -1,6 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
-import { profile as staticProfile, assets as staticAssets } from "@/data/portfolio";
 import type { Profile } from "@/lib/api";
 
 const nav = [
@@ -11,15 +10,9 @@ const nav = [
 ] as const;
 
 export function SiteShell({ children, profile }: { children: ReactNode; profile?: Profile | null }) {
-  const p = profile || {
-    name: staticProfile.name,
-    location: staticProfile.location,
-    github: staticProfile.github,
-    linkedin: staticProfile.linkedin,
-    resume_url: staticAssets.resume,
-  } as any;
+  const p = profile || ({ name: "", location: "", github: "", linkedin: "", resume_url: "" } as any);
 
-  const resumeUrl = (p.resume_url as string) || staticAssets.resume || (p as any).resumeUrl;
+  const resumeUrl = (p.resume_url as string) || (p as any).resumeUrl || "";
 
   return (
     <div className="min-h-screen">

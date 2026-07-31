@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { PageHeader, SiteShell } from "@/components/SiteShell";
 import { Reveal } from "@/components/Reveal";
-import { experience as staticExp } from "@/data/portfolio";
 import { getExperiences, type Experience as ExpType, getProfile } from "@/lib/api";
 
 /**
@@ -197,7 +196,7 @@ export default function Experience() {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  const list = experiences?.length ? experiences : (staticExp as unknown as ExpType[]);
+  const list = experiences || [];
 
   return (
     <SiteShell profile={profile}>

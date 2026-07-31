@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { assets, profile as staticProfile } from "@/data/portfolio";
 import type { Profile } from "@/lib/api";
 
 interface Props {
@@ -22,16 +21,13 @@ interface Props {
  *  - the punch holes and brass rivets are centred exactly on the tips
  */
 export default function IDCard({ profile }: Props) {
-  const p = profile || {
-    email: staticProfile.email,
-    phone: staticProfile.phone,
-    profile_image_url: assets.portrait,
-  } as any;
+  const p = profile || ({} as any);
 
-  // the picture the card wants to show (API url first, bundled portrait fallback)
-  const wanted = p.profile_image_url || assets.portrait;
+  // the picture the card wants to show (API url first)
+  const wanted = p.profile_image_url || "";
   const [src, setSrc] = useState(wanted);
-  const [ready, setReady] = useState(false); // picture fully loaded -> card may drop
+  const [ready, setReady] = useState(!wanted); // drop immediately if no image
+  const imgRef = useRef<HTMLImageElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -47,10 +43,8 @@ export default function IDCard({ profile }: Props) {
     if (!el || !el.complete) return;
     if (el.naturalWidth > 0) {
       setReady(true);
-    } else if (src !== assets.portrait) {
-      setSrc(assets.portrait); // url failed -> use the bundled portrait directly
     } else {
-      setReady(true); // even the fallback failed -> drop anyway, show the contact strip
+      setReady(true); // image failed -> drop anyway
     }
   }, [ready, src]);
 
@@ -70,7 +64,7 @@ export default function IDCard({ profile }: Props) {
       <div
         className={
           ready
-            ? "origin-top animate-[lanyard-drop_1.7s_linear_forwards] motion-reduce:animate-none"
+            ? "origin-top animate-[lanyard-drop_2.8s_linear_forwards] motion-reduce:animate-none"
             : "origin-top opacity-0"
         }
       >
@@ -79,7 +73,7 @@ export default function IDCard({ profile }: Props) {
         <div
           className={
             ready
-              ? "origin-top animate-[lanyard-sway_5.5s_ease-in-out_1.7s_infinite] motion-reduce:animate-none"
+              ? "origin-top animate-[lanyard-sway_8s_ease-in-out_2.8s_infinite] motion-reduce:animate-none"
               : "origin-top"
           }
         >
@@ -96,30 +90,32 @@ export default function IDCard({ profile }: Props) {
         </div>
 
         {/* the card itself */}
-        <div className="relative -mt-[6px] w-[340px] overflow-hidden rounded-[16px] border border-border bg-white shadow-[0_24px_50px_-20px_rgba(0,0,0,0.7)]">
+        <div className="relative -mt-[6px] w-[340px] overflow-hidden rounded-[16px] border border-border bg-gradient-to-br from-[#f4f6fb] via-[#ede9fe] to-[#e0f2fe] bg-[length:200%_200%] animate-[gradient-shift_8s_ease_infinite] shadow-[0_24px_50px_-20px_rgba(0,0,0,0.7)]">
           {/* photo — most of the card, rectangular, framed from the top so the head is never cut */}
           <div className="relative h-[360px] w-full bg-zinc-200">
-            <img
-              ref={imgRef}
-              src={src}
-              alt="Profile"
-              className="h-full w-full object-cover object-top"
-              loading="eager"
-              fetchPriority="high"
-              onLoad={() => setReady(true)}
-              onError={() => {
-                // url failed -> use the bundled portrait directly
-                if (src !== assets.portrait) setSrc(assets.portrait);
-                else setReady(true);
-              }}
-            />
+            {src ? (
+              <img
+                ref={imgRef}
+                src={src}
+                alt="Profile"
+                className="h-full w-full object-cover object-top"
+                loading="eager"
+                fetchPriority="high"
+                onLoad={() => setReady(true)}
+                onError={() => {
+                  setReady(true); // image failed -> drop anyway
+                }}
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-zinc-200 via-zinc-300 to-zinc-200" />
+            )}
             {/* punch holes behind the rivets (centred on the strip tips, 6px from the card top) */}
             <span className="absolute left-[calc(50%-62px)] top-[2px] h-2 w-2 rounded-full bg-black/25 ring-1 ring-black/40" />
             <span className="absolute left-[calc(50%+54px)] top-[2px] h-2 w-2 rounded-full bg-black/25 ring-1 ring-black/40" />
           </div>
 
           {/* contact strip — only ID / phone / email */}
-          <div className="space-y-2 bg-[#f4f6fb] px-5 py-5">
+          <div className="space-y-2 bg-gradient-to-r from-[#f4f6fb] via-[#ede9fe] to-[#e0f2fe] bg-[length:200%_200%] animate-[gradient-shift_8s_ease_infinite] px-5 py-5">
             <div className="font-mono text-sm font-extrabold uppercase tracking-widest text-blue-700">ID {badgeId}</div>
             <div className="font-mono text-xl font-bold text-zinc-900 break-words leading-snug">{p.phone || "—"}</div>
             <div className="font-mono text-lg font-medium text-zinc-600 break-words leading-snug">{p.email}</div>
