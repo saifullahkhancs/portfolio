@@ -44,6 +44,9 @@ def create_app(config_object: str | None = None) -> Flask:
         os.environ.get("DATABASE_URL", "sqlite:///dev.db")
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = _engine_options(
+        app.config["SQLALCHEMY_DATABASE_URI"]
+    )
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-in-production")
     app.config["UPLOAD_FOLDER"] = os.environ.get(
         "UPLOAD_FOLDER", os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
@@ -86,11 +89,49 @@ def create_app(config_object: str | None = None) -> Flask:
     with app.app_context():
         try:
             db.create_all()
-        except Exception:
-            # don't crash on startup if DB not reachable
-            pass
+        except Exception as exc:  # noqa: BLE001 - startup must not hard-fail
+            # Don't crash on startup if the DB isn't reachable, but do say so —
+            # silently swallowing this turns a config problem into a mystery
+            # "connection timeout expired" on the first API request.
+            app.logger.warning(
+                "Could not reach the database at startup (%s: %s). "
+                "Check DATABASE_URL. Supabase note: the direct host "
+                "db.<ref>.supabase.co is IPv6-only and times out on IPv4-only "
+                "networks — use the session pooler host "
+                "aws-0-<region>.pooler.supabase.com instead. "
+                "Run `python check_db.py` to diagnose.",
+                type(exc).__name__,
+                exc,
+            )
 
     return app
+
+
+def _engine_options(url: str) -> dict:
+    """Connection-pool settings that keep managed Postgres connections healthy.
+
+    - ``connect_timeout`` makes an unreachable host fail in seconds instead of
+      hanging until the driver's default timeout.
+    - ``pool_pre_ping`` discards connections that a pooler/idle-timeout killed,
+      which otherwise surface as random OperationalErrors.
+    - ``pool_recycle`` stays under Supabase/PgBouncer idle limits.
+    """
+    if not url.startswith("postgresql"):
+        return {}
+    options: dict = {
+        "pool_pre_ping": True,
+        "pool_recycle": int(os.environ.get("DB_POOL_RECYCLE", "280")),
+        "pool_size": int(os.environ.get("DB_POOL_SIZE", "5")),
+        "max_overflow": int(os.environ.get("DB_MAX_OVERFLOW", "5")),
+        "connect_args": {
+            "connect_timeout": int(os.environ.get("DB_CONNECT_TIMEOUT", "10")),
+        },
+    }
+    # Supabase's transaction pooler (port 6543) can't handle prepared
+    # statements; psycopg needs them turned off there.
+    if ":6543" in url and "prepare_threshold" not in url:
+        options["connect_args"]["prepare_threshold"] = None
+    return options
 
 
 def _normalize_db_url(url: str) -> str:
