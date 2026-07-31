@@ -9,6 +9,7 @@ import { ToolStrips } from "@/components/ToolStrips";
 import { TiltCard } from "@/components/TiltCard";
 import IDCard from "@/components/IDCard";
 import HeroAnimation from "@/components/HeroAnimation";
+import CertCarousel from "@/components/CertCarousel";
 import { getPortfolio, type PortfolioData } from "@/lib/api";
 
 const certImages: Record<string, string> = {
@@ -72,7 +73,7 @@ export default function Home() {
           }}
         />
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.45fr)_340px] lg:gap-14">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.4fr)_360px] lg:gap-14">
           <div>
           <HeroAnimation name={profile.name || staticProfile.name} title={profile.title || profile.role} desc={profile.description || profile.summary} />
 
@@ -95,7 +96,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up w-full max-w-[340px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
+          <div className="animate-fade-up w-full max-w-[360px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
             <IDCard profile={profile} />
           </div>
         </div>
@@ -211,36 +212,14 @@ export default function Home() {
         <Reveal>
           <h2 className="text-2xl font-bold">Certifications</h2>
         </Reveal>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {certifications.map((c: any, i: number) => {
-            const imgKey = c.image_key || c.image || "";
-            const imgUrl = c.image_url || certImages[imgKey] || "";
-            return (
-              <Reveal key={c.name} delay={i * 110}>
-                <article className="panel group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_0_40px_-18px_var(--color-primary)]">
-                  <div className="overflow-hidden border-b border-border bg-secondary">
-                    {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={`${c.name} certificate issued by ${c.issuer}`}
-                        loading="lazy"
-                        className="h-40 w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="h-40 w-full bg-secondary" />
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <p className="font-mono text-xs text-muted-foreground">{c.year}</p>
-                    <h3 className="mt-2 text-base font-semibold leading-snug">{c.name}</h3>
-                    <p className="font-mono text-sm text-primary">{c.issuer}</p>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.detail}</p>
-                  </div>
-                </article>
-              </Reveal>
-            );
-          })}
-        </div>
+        <Reveal delay={90}>
+          <div className="mt-10">
+            <CertCarousel
+              items={certifications as any[]}
+              imageFor={(c: any) => c.image_url || certImages[c.image_key || c.image || ""] || ""}
+            />
+          </div>
+        </Reveal>
       </section>
 
       <section className="mx-auto max-w-5xl px-6 pb-4">
