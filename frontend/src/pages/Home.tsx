@@ -119,7 +119,7 @@ export default function Home() {
           }}
         />
         <div className="hero-surface pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-28 md:grid-cols-[minmax(0,1.4fr)_360px] lg:gap-14">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-6 px-4 py-12 sm:gap-10 sm:px-6 sm:py-20 md:grid-cols-[minmax(0,1.4fr)_360px] md:py-28 lg:gap-14">
           <div>
             <HeroAnimation
               name={profile?.name || "Saifullah Khan"}
@@ -127,7 +127,7 @@ export default function Home() {
               desc={profile?.description || (profile as any)?.summary || fallbackPortfolio.profile!.description}
             />
 
-            <div className="mt-8 flex flex-wrap gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: "300ms" }}>
+            <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: "300ms" }}>
               <Link
                 to="/projects"
                 className="rounded-md bg-primary px-5 py-2.5 font-medium text-primary-foreground transition-opacity hover:opacity-90"
@@ -150,12 +150,12 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up w-full max-w-[360px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
+          <div className="animate-fade-up w-full max-w-[280px] sm:max-w-[360px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
             <IDCard profile={profile} />
           </div>
         </div>
 
-        <div className="relative mx-auto max-w-5xl px-6 pb-14">
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 pb-10 sm:pb-14">
           <dl className="grid gap-6 border-t border-border pt-8 font-mono text-sm sm:grid-cols-3">
             {[
               ["Experience", "3+ years engineering"],
