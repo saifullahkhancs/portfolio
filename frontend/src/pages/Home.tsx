@@ -127,7 +127,7 @@ export default function Home() {
               desc={profile?.description || (profile as any)?.summary || fallbackPortfolio.profile!.description}
             />
 
-            <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: "300ms" }}>
+            <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 font-mono text-sm animate-fade-up" style={{ animationDelay: "150ms" }}>
               <Link
                 to="/projects"
                 className="rounded-md bg-primary px-5 py-2.5 font-medium text-primary-foreground transition-opacity hover:opacity-90"
@@ -150,7 +150,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up w-full max-w-[280px] sm:max-w-[360px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "160ms" }}>
+          <div className="animate-fade-up w-full max-w-[280px] sm:max-w-[360px] justify-self-center pt-2 md:justify-self-end" style={{ animationDelay: "80ms" }}>
             <IDCard profile={profile} />
           </div>
         </div>
