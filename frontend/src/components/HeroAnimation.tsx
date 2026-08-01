@@ -50,7 +50,7 @@ function Caret({ big = false }: { big?: boolean }) {
 }
 
 const packetClass =
-  "packet absolute whitespace-nowrap rounded border border-primary/30 bg-background/95 px-1.5 py-0.5 font-mono text-[9px] text-primary shadow";
+  "packet absolute whitespace-nowrap rounded border border-primary/30 bg-background/95 px-1.5 py-0.5 font-mono text-[9px] text-primary shadow opacity-0";
 
 export default function HeroAnimation({ name, title, desc }: { name: string; title: string; desc: string }) {
   // Defensive: ensure strings even if backend returns null/undefined
@@ -62,6 +62,7 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
   const [titleChars, setTitleChars] = useState(0);
   const [nameChars, setNameChars] = useState(0);
   const [descWords, setDescWords] = useState(0);
+  const [descVisible, setDescVisible] = useState(true);
 
   const words = useMemo(() => safeDesc.split(" ").filter(Boolean), [safeDesc]);
   const firstSpace = safeName.indexOf(" ");
@@ -92,22 +93,39 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
     const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
 
     // staged typewriter: boot -> title -> name -> description -> done
+    // Each line takes ~2-3 seconds: title ~150ms/char, name ~180ms/char, desc ~280ms/word
     let t = 300; // reduced initial delay so page doesn't look blank
     at(t, () => setPhase("title"));
-    safeTitle.split("").forEach((_, i) => at(t + 30 + i * 18, () => setTitleChars(i + 1)));
-    t += 30 + safeTitle.length * 18 + 180;
+    safeTitle.split("").forEach((_, i) => at(t + 30 + i * 150, () => setTitleChars(i + 1)));
+    t += 30 + safeTitle.length * 150 + 500;
 
     at(t, () => setPhase("name"));
-    safeName.split("").forEach((_, i) => at(t + 30 + i * 35, () => setNameChars(i + 1)));
-    t += 30 + safeName.length * 35 + 180;
+    safeName.split("").forEach((_, i) => at(t + 30 + i * 180, () => setNameChars(i + 1)));
+    t += 30 + safeName.length * 180 + 500;
 
     at(t, () => setPhase("desc"));
-    words.forEach((_, i) => at(t + 40 + i * 22, () => setDescWords(i + 1)));
-    t += 40 + words.length * 22 + 100;
+    words.forEach((_, i) => at(t + 40 + i * 280, () => setDescWords(i + 1)));
+    t += 40 + words.length * 280 + 300;
 
     at(t, () => setPhase("done"));
     return () => timers.forEach(clearTimeout);
   }, [safeName, safeTitle, words]);
+
+  /* ---- Description fade cycle: every 20s the description fades out then back in ---- */
+  useEffect(() => {
+    if (phase !== "done") return;
+
+    let fadeOutTimer: number;
+    const interval = window.setInterval(() => {
+      setDescVisible(false);
+      fadeOutTimer = window.setTimeout(() => setDescVisible(true), 1500);
+    }, 20000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(fadeOutTimer);
+    };
+  }, [phase]);
 
   const started = phase !== "boot";
   const typedFirst = safeName.slice(0, firstSpace === -1 ? nameChars : Math.min(nameChars, firstSpace));
@@ -123,7 +141,7 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
   return (
     <div className="hero-machine relative">
       {/* ============ output #1 — title, fed from the machine ============ */}
-      <div className="flex min-h-[20px] items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+      <div className="flex min-h-[20px] items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.28em] text-primary">
         <span
           className={`h-1.5 w-1.5 shrink-0 rounded-full bg-primary transition-opacity ${
             phase === "title" ? "opacity-100 animate-[node-glow_0.9s_ease-in-out_infinite]" : started ? "opacity-70" : "opacity-100"
@@ -134,7 +152,7 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
       </div>
 
       {/* ============ output #2 — name (single font for both parts) ============ */}
-      <h1 className="mt-3 min-h-[5.6rem] font-mono text-4xl font-bold leading-[1.15] sm:min-h-[3.9rem] sm:text-5xl">
+      <h1 className="mt-3 min-h-[3.2rem] font-mono text-3xl font-bold leading-[1.15] sm:min-h-[5.6rem] sm:text-4xl md:text-5xl">
         <span className="text-gradient">{displayFirst}</span>
         {showSpace || !started ? " " : ""}
         <span className="text-gradient">{displayLast || (!started && firstSpace !== -1 ? safeName.slice(firstSpace + 1) : "")}</span>
@@ -142,7 +160,9 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
       </h1>
 
       {/* ============ the machine: wires + packets + computer ============ */}
-      <div className="relative mt-7 h-[108px] animate-fade-up" aria-hidden="true">
+      <div className="relative mt-5 h-[80px] sm:mt-7 sm:h-[108px] animate-fade-up" aria-hidden="true">
+        {/* Machine content — scaled down on mobile for compact fit */}
+        <div className="absolute inset-0 origin-top scale-[0.72] sm:scale-100">
         {/* side wires (strips) feeding the computer */}
         <div className="absolute left-0 right-[calc(50%+32px)] top-[46px] h-px bg-gradient-to-r from-transparent via-primary/30 to-primary/60" />
         <div className="absolute left-[calc(50%+32px)] right-0 top-[46px] h-px bg-gradient-to-l from-transparent via-primary/30 to-primary/60" />
@@ -209,19 +229,20 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
             <span className="pulse-dot absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary animate-[wire-pulse-down_1.6s_linear_infinite]" />
           </div>
         </div>
+        </div>{/* end machine-content scale wrapper */}
       </div>
 
       {/* ============ output #3 — description terminal box ============ */}
-      <div className="relative min-h-[200px] overflow-hidden rounded-xl border border-border bg-surface/70 shadow-inner">
-        <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">extracted_output.txt</span>
+      <div className="relative min-h-[140px] sm:min-h-[200px] overflow-hidden rounded-xl border border-border bg-surface/70 shadow-inner">
+        <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5 sm:px-4 sm:py-2">
+          <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground">extracted_output.txt</span>
           <span className="flex gap-1.5">
             <span className="h-2 w-2 rounded-full bg-zinc-600" />
             <span className={`h-2 w-2 rounded-full ${started ? "bg-primary/70" : "bg-zinc-600"} transition-colors`} />
             <span className={`h-2 w-2 rounded-full ${phase === "done" ? "bg-primary" : "bg-zinc-600"} transition-colors`} />
           </span>
         </div>
-        <p className="p-4 text-sm leading-relaxed text-muted-foreground">
+        <p className={`p-3 sm:p-4 text-xs sm:text-sm leading-relaxed text-muted-foreground transition-opacity duration-700 ease-in-out ${descVisible ? "opacity-100" : "opacity-0"}`}>
           {displayDesc}
           {phase === "desc" && <Caret />}
           {!started && words.length > 20 ? "..." : ""}
