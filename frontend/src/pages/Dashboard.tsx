@@ -23,6 +23,16 @@ function isDirectVideoUrl(value: string) {
   return /\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test(value.trim());
 }
 
+// Available public assets for quick selection (matches frontend/public/images/)
+const PUBLIC_IMAGE_FILES = [
+  "/images/portrait.png",
+  "/images/hero-banner.png",
+  "/images/resume.pdf",
+  "/images/cert-azure.png",
+  "/images/cert-hackerrank.png",
+  "/images/cert-javascript.jpg",
+];
+
 interface MediaUrlFieldProps {
   label: string;
   value: string;
@@ -437,6 +447,19 @@ export default function Dashboard() {
                   )
                 }
               />
+              <div className="sm:col-span-2 flex gap-2">
+                <span className="font-mono text-xs text-muted-foreground self-center">Quick select:</span>
+                <select
+                  className="flex-1 rounded border bg-secondary px-2 py-1.5 text-xs"
+                  value={profile.profile_image_url || ""}
+                  onChange={(e) => setProfile({ ...profile, profile_image_url: e.target.value })}
+                >
+                  <option value="">Choose profile image...</option>
+                  {PUBLIC_IMAGE_FILES.filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')).map((f) => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
               <MediaUrlField
                 className="sm:col-span-2"
                 label="Hero Banner Photo"
@@ -451,9 +474,39 @@ export default function Dashboard() {
                   )
                 }
               />
+              <div className="sm:col-span-2 flex gap-2">
+                <span className="font-mono text-xs text-muted-foreground self-center">Quick select:</span>
+                <select
+                  className="flex-1 rounded border bg-secondary px-2 py-1.5 text-xs"
+                  value={profile.hero_banner_url || ""}
+                  onChange={(e) => setProfile({ ...profile, hero_banner_url: e.target.value })}
+                >
+                  <option value="">Choose hero banner...</option>
+                  {PUBLIC_IMAGE_FILES.filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')).map((f) => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
               <label className="space-y-1.5 sm:col-span-2">
                 <span className="font-mono text-xs text-muted-foreground">Resume URL</span>
-                <input className="w-full rounded border bg-background p-2.5 text-sm" value={profile.resume_url} onChange={(e) => setProfile({ ...profile, resume_url: e.target.value })} />
+                <div className="flex gap-2">
+                  <select
+                    className="w-full rounded border bg-background p-2.5 text-sm"
+                    value={profile.resume_url || ""}
+                    onChange={(e) => setProfile({ ...profile, resume_url: e.target.value })}
+                  >
+                    <option value="">Select resume file...</option>
+                    {PUBLIC_IMAGE_FILES.map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </div>
+                <input
+                  className="mt-2 w-full rounded border bg-background p-2.5 text-sm"
+                  placeholder="Or paste a custom URL"
+                  value={profile.resume_url || ""}
+                  onChange={(e) => setProfile({ ...profile, resume_url: e.target.value })}
+                />
               </label>
               <label className="space-y-1.5 sm:col-span-2">
                 <span className="font-mono text-xs text-muted-foreground">Description / Summary</span>
@@ -479,6 +532,7 @@ export default function Dashboard() {
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Company" value={e.company} onChange={(ev) => setExperiences((xs) => xs.map((x, j) => (j === i ? { ...x, company: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Location" value={e.location} onChange={(ev) => setExperiences((xs) => xs.map((x, j) => (j === i ? { ...x, location: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Period" value={e.period} onChange={(ev) => setExperiences((xs) => xs.map((x, j) => (j === i ? { ...x, period: ev.target.value } : x)))} />
+                  <input className="w-20 rounded border bg-background p-2 text-sm font-mono" type="number" placeholder="Order" value={e.sort_order || 0} onChange={(ev) => setExperiences((xs) => xs.map((x, j) => (j === i ? { ...x, sort_order: Number(ev.target.value) || 0 } : x)))} />
                 </div>
                 <div className="space-y-2">
                   <p className="font-mono text-xs text-muted-foreground">Points (one per line)</p>
@@ -512,6 +566,7 @@ export default function Dashboard() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Tagline" value={p.tagline} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, tagline: e.target.value } : q)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Period" value={p.period} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, period: e.target.value } : q)))} />
+                  <input className="w-20 rounded border bg-background p-2 text-sm font-mono" type="number" placeholder="Order" value={(p as any).sort_order || p.sort_order || 0} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, sort_order: Number(e.target.value) || 0 } : q)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Project URL" value={p.project_url || (p as any).projectUrl || ""} onChange={(e) => setProjects((xs) => xs.map((q, j) => (j === i ? { ...q, project_url: e.target.value, projectUrl: e.target.value } : q)))} />
                   <MediaUrlField
                     className="sm:col-span-2"
@@ -555,6 +610,7 @@ export default function Dashboard() {
             {skills.map((s, i) => (
               <div key={s.id} className="panel space-y-3 p-6">
                 <input className="w-full rounded border bg-background p-2 text-sm font-semibold" value={s.group_name || s.group} onChange={(e) => setSkills((xs) => xs.map((q, j) => (j === i ? { ...q, group: e.target.value, group_name: e.target.value } : q)))} />
+                <input className="w-20 rounded border bg-background p-2 text-sm font-mono" type="number" placeholder="Order" value={s.sort_order || 0} onChange={(e) => setSkills((xs) => xs.map((q, j) => (j === i ? { ...q, sort_order: Number(e.target.value) || 0 } : q)))} />
                 <div>
                   <p className="font-mono text-xs text-muted-foreground">Items (comma separated)</p>
                   <textarea className="mt-1 w-full rounded border bg-background p-2 text-sm" rows={2} value={(s.items || []).join(", ")} onChange={(e) => setSkills((xs) => xs.map((q, j) => (j === i ? { ...q, items: e.target.value.split(",").map((v) => v.trim()).filter(Boolean) } : q)))} />
@@ -582,6 +638,7 @@ export default function Dashboard() {
                   <input className="rounded border bg-background p-2 text-sm" placeholder="School" value={e.school} onChange={(ev) => setEducations((xs) => xs.map((x, j) => (j === i ? { ...x, school: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Degree" value={e.degree} onChange={(ev) => setEducations((xs) => xs.map((x, j) => (j === i ? { ...x, degree: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Period" value={e.period} onChange={(ev) => setEducations((xs) => xs.map((x, j) => (j === i ? { ...x, period: ev.target.value } : x)))} />
+                  <input className="w-20 rounded border bg-background p-2 text-sm font-mono" type="number" placeholder="Order" value={e.sort_order || 0} onChange={(ev) => setEducations((xs) => xs.map((x, j) => (j === i ? { ...x, sort_order: Number(ev.target.value) || 0 } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="CGPA" value={e.cgpa} onChange={(ev) => setEducations((xs) => xs.map((x, j) => (j === i ? { ...x, cgpa: ev.target.value } : x)))} />
                 </div>
                 <textarea className="w-full rounded border bg-background p-2 text-sm" rows={3} placeholder="Coursework" value={e.coursework} onChange={(ev) => setEducations((xs) => xs.map((x, j) => (j === i ? { ...x, coursework: ev.target.value } : x)))} />
@@ -608,6 +665,7 @@ export default function Dashboard() {
                   <input className="rounded border bg-background p-2 text-sm font-semibold" placeholder="Name" value={c.name} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, name: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Issuer" value={c.issuer} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, issuer: ev.target.value } : x)))} />
                   <input className="rounded border bg-background p-2 text-sm" placeholder="Year" value={c.year} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, year: ev.target.value } : x)))} />
+                  <input className="w-20 rounded border bg-background p-2 text-sm font-mono" type="number" placeholder="Order" value={c.sort_order} onChange={(ev) => setCertifications((xs) => xs.map((x, j) => (j === i ? { ...x, sort_order: Number(ev.target.value) || 0 } : x)))} />
                   <MediaUrlField
                     className="sm:col-span-2"
                     label="Certificate Photo"

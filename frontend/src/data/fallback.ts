@@ -27,9 +27,9 @@ export const fallbackProfile = {
   "location": "Lahore, Pakistan",
   "linkedin": "https://linkedin.com/in/saifullah-khan",
   "github": "https://github.com/saifullahkhancs",
-  "profile_image_url": "http://localhost:8000/uploads/images/0463d139cb79403f901f33770ad9503d-portrait.png",
-  "hero_banner_url": "http://localhost:8000/uploads/images/cacbc2a210e74443ad285f13c3468bee-Background_banner4.png",
-  "resume_url": "https://saif-portofolio.lovable.app/__l5e/assets-v1/6d656b6e-0513-40c3-a30a-03fc6c99c836/Saifullah_Khan_Resume.pdf"
+  "profile_image_url": "/images/portrait.png",
+  "hero_banner_url": "/images/hero-banner.png",
+  "resume_url": "/images/resume.pdf"
 };
 
 export const fallbackExperiences = [
@@ -317,7 +317,7 @@ export const fallbackCertifications = [
     "issuer": "Microsoft",
     "year": "10 Jun 2026",
     "detail": "Azure cloud fundamentals — core cloud concepts and infrastructure services.",
-    "image_url": "http://localhost:8000/uploads/images/400a1157df7d404daaedd1ce8c91704d-cert-azure.png",
+    "image_url": "/images/cert-azure.png",
     "image": "azure",
     "image_key": "azure",
     "sort_order": 2
