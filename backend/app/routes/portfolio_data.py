@@ -28,10 +28,12 @@ def _save_and_return(obj, status=200):
 
 
 def _upload_root() -> str:
+    # Save uploads directly into frontend/public so they're available
+    # both locally (via Vite/static) and on deployed static sites.
     root = (
         current_app.config.get("UPLOAD_FOLDER")
         or os.environ.get("UPLOAD_FOLDER")
-        or os.path.abspath(os.path.join(current_app.root_path, "..", "uploads"))
+        or os.path.abspath(os.path.join(current_app.root_path, "..", "..", "frontend", "public"))
     )
     os.makedirs(root, exist_ok=True)
     return root
@@ -52,14 +54,16 @@ def _folder_for_extension(ext: str) -> str:
     if ext in IMAGE_EXTENSIONS:
         return "images"
     if ext in VIDEO_EXTENSIONS:
-        return "videos"
+        return "images"
     if ext in DOCUMENT_EXTENSIONS:
-        return "documents"
-    return "media"
+        return "images"
+    return "images"
 
 
 def _external_upload_url(stored_path: str) -> str:
-    return url_for("portfolio.uploaded_file", filename=stored_path, _external=True)
+    # Return a public-path URL that works both locally (Vite serves public/ at /)
+    # and on deployed static sites (no backend needed).
+    return f"/{stored_path}"
 
 # ---------- uploads ----------
 @portfolio_bp.get("/uploads/<path:filename>")

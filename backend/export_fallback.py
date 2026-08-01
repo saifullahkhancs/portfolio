@@ -62,6 +62,47 @@ def _default_output() -> str:
     return os.path.join(_repo_root(), "frontend", "src", "data", "fallback.ts")
 
 
+def _fix_localhost_urls(obj) -> None:
+    """Replace localhost upload URLs with public /images/ paths when the file exists."""
+    public_images_dir = os.path.join(_repo_root(), "frontend", "public", "images")
+    public_files = {}
+    if os.path.isdir(public_images_dir):
+        for entry in os.listdir(public_images_dir):
+            if os.path.isfile(os.path.join(public_images_dir, entry)):
+                # Index both full name and stem (without extension)
+                public_files[entry.lower()] = f"/images/{entry}"
+                stem = os.path.splitext(entry)[0].lower()
+                public_files.setdefault(stem, f"/images/{entry}")
+
+    def _replace_url(url: str) -> str:
+        if not isinstance(url, str) or not url.startswith("http"):
+            return url
+        if not any(h in url for h in _LOCALHOST_HINTS):
+            return url
+        basename = os.path.basename(url)
+        if basename.lower() in public_files:
+            return public_files[basename.lower()]
+        stem = os.path.splitext(basename)[0].lower()
+        for key, value in public_files.items():
+            if stem.endswith(key) or key in stem:
+                return value
+        for public_name, value in public_files.items():
+            public_stem = os.path.splitext(public_name)[0].lower()
+            if public_stem in basename.lower() and basename.lower() != public_name.lower():
+                return value
+        return url
+
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if isinstance(v, str):
+                obj[k] = _replace_url(v)
+            elif isinstance(v, (dict, list)):
+                _fix_localhost_urls(v)
+    elif isinstance(obj, list):
+        for item in obj:
+            _fix_localhost_urls(item)
+
+
 def _clean(obj):
     """Return a JSON-clean copy with backend-only timestamp keys removed."""
     if isinstance(obj, dict):
@@ -234,6 +275,8 @@ def main() -> int:
 
     print(f"Reading from DB: {args.database_url}", file=sys.stderr)
     snapshot = load_portfolio_snapshot(args.database_url)
+    # Fix any localhost URLs by mapping them to public /images/ paths.
+    _fix_localhost_urls(snapshot)
 
     counts = {
         "profile": 1 if snapshot["profile"] else 0,
