@@ -92,22 +92,17 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
     const timers: number[] = [];
     const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
 
-    // staged typewriter: boot -> title -> name -> description -> done
-    // Each line takes ~2-3 seconds: title ~150ms/char, name ~180ms/char, desc ~280ms/word
-    let t = 300; // reduced initial delay so page doesn't look blank
-    at(t, () => setPhase("title"));
-    safeTitle.split("").forEach((_, i) => at(t + 30 + i * 150, () => setTitleChars(i + 1)));
-    t += 30 + safeTitle.length * 150 + 500;
+    // Parallel typewriter animations: title, name, and description start together
+    const tStart = 50; 
+    at(tStart, () => setPhase("title"));
 
-    at(t, () => setPhase("name"));
-    safeName.split("").forEach((_, i) => at(t + 30 + i * 180, () => setNameChars(i + 1)));
-    t += 30 + safeName.length * 180 + 500;
+    // Speed up typing for parallel effect
+    safeTitle.split("").forEach((_, i) => at(tStart + i * 50, () => setTitleChars(i + 1)));
+    safeName.split("").forEach((_, i) => at(tStart + i * 60, () => setNameChars(i + 1)));
+    words.forEach((_, i) => at(tStart + i * 100, () => setDescWords(i + 1)));
 
-    at(t, () => setPhase("desc"));
-    words.forEach((_, i) => at(t + 40 + i * 280, () => setDescWords(i + 1)));
-    t += 40 + words.length * 280 + 300;
-
-    at(t, () => setPhase("done"));
+    const maxT = Math.max(safeTitle.length * 50, safeName.length * 60, words.length * 100);
+    at(tStart + maxT + 200, () => setPhase("done"));
     return () => timers.forEach(clearTimeout);
   }, [safeName, safeTitle, words]);
 
@@ -144,23 +139,23 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
       <div className="flex min-h-[20px] items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.28em] text-primary">
         <span
           className={`h-1.5 w-1.5 shrink-0 rounded-full bg-primary transition-opacity ${
-            phase === "title" ? "opacity-100 animate-[node-glow_0.9s_ease-in-out_infinite]" : started ? "opacity-70" : "opacity-100"
+            started && phase !== "done" ? "opacity-100 animate-[node-glow_0.9s_ease-in-out_infinite]" : started ? "opacity-70" : "opacity-100"
           }`}
         />
         <span>{displayTitle}</span>
-        {phase === "title" && <Caret />}
+        {started && titleChars < safeTitle.length && <Caret />}
       </div>
 
       {/* ============ output #2 — name (single font for both parts) ============ */}
-      <h1 className="mt-3 min-h-[3.2rem] font-mono text-3xl font-bold leading-[1.15] sm:min-h-[5.6rem] sm:text-4xl md:text-5xl">
+      <h1 className="mt-2 min-h-[2.4rem] font-mono text-3xl font-bold leading-[1.15] sm:min-h-[4rem] sm:text-4xl md:text-5xl">
         <span className="text-gradient">{displayFirst}</span>
         {showSpace || !started ? " " : ""}
         <span className="text-gradient">{displayLast || (!started && firstSpace !== -1 ? safeName.slice(firstSpace + 1) : "")}</span>
-        {phase === "name" && <Caret big />}
+        {started && nameChars < safeName.length && <Caret big />}
       </h1>
 
       {/* ============ the machine: wires + packets + computer ============ */}
-      <div className="relative mt-5 h-[80px] sm:mt-7 sm:h-[108px] animate-fade-up" aria-hidden="true">
+      <div className="relative mt-2 h-[80px] sm:mt-4 sm:h-[108px] animate-fade-up" aria-hidden="true">
         {/* Machine content — scaled down on mobile for compact fit */}
         <div className="absolute inset-0 origin-top scale-[0.72] sm:scale-100">
         {/* side wires (strips) feeding the computer */}
@@ -244,11 +239,11 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
         </div>
         <p className={`p-3 sm:p-4 text-xs sm:text-sm leading-relaxed text-muted-foreground transition-opacity duration-700 ease-in-out ${descVisible ? "opacity-100" : "opacity-0"}`}>
           {displayDesc}
-          {phase === "desc" && <Caret />}
+          {started && descWords < words.length && phase !== "done" && <Caret />}
           {!started && words.length > 20 ? "..." : ""}
         </p>
         {/* scanning shimmer while the description is being extracted */}
-        {phase === "desc" && (
+        {started && descWords < words.length && phase !== "done" && (
           <div className="pointer-events-none absolute left-0 right-0 h-12 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-[scan-sweep_1.15s_linear_infinite]" />
         )}
       </div>
