@@ -50,7 +50,7 @@ export default function IDCard({ profile }: Props) {
 
   return (
     <div
-      className="relative mx-auto w-[340px] select-none md:mx-0 md:ml-auto md:translate-x-6 lg:translate-x-10"
+      className="relative mx-auto w-full max-w-[340px] select-none md:mx-0 md:ml-auto md:translate-x-6 lg:translate-x-10"
       aria-label="ID badge"
     >
       <div
@@ -75,7 +75,7 @@ export default function IDCard({ profile }: Props) {
             <span className={`${rivet} left-[calc(50%+53px)] top-[91px]`} />
           </div>
 
-          <div className="relative -mt-[6px] w-[340px] overflow-hidden rounded-[16px] border border-border bg-gradient-to-br from-[#f4f6fb] via-[#ede9fe] to-[#e0f2fe] bg-[length:200%_200%] animate-[gradient-shift_8s_ease_infinite] shadow-[0_24px_50px_-20px_rgba(0,0,0,0.7)]">
+          <div className="relative -mt-[6px] w-full overflow-hidden rounded-[16px] border border-border bg-gradient-to-br from-[#f4f6fb] via-[#ede9fe] to-[#e0f2fe] bg-[length:200%_200%] animate-[gradient-shift_8s_ease_infinite] shadow-[0_24px_50px_-20px_rgba(0,0,0,0.7)]">
             <div className="relative h-[360px] w-full bg-zinc-200">
               {src ? (
                 <img
