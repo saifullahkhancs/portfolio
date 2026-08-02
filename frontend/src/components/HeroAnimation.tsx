@@ -134,7 +134,7 @@ export default function HeroAnimation({ name, title, desc }: { name: string; tit
   const displayDesc = started ? words.slice(0, descWords).join(" ") : words.slice(0, Math.min(20, words.length)).join(" ");
 
   return (
-    <div className="hero-machine relative">
+    <div className="hero-machine relative max-w-5xl mx-auto px-4">
       {/* ============ output #1 — title, fed from the machine ============ */}
       <div className="flex min-h-[20px] items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.28em] text-primary">
         <span

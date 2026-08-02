@@ -6,6 +6,7 @@ import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
+import { Analytics } from "@vercel/analytics/react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function ScrollToTop() {
@@ -20,6 +21,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ScrollToTop />
+      <Analytics />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/experience" element={<Experience />} />
