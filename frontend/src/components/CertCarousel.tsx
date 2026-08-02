@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /**
  * Coverflow-style certificate carousel.
@@ -33,7 +33,24 @@ export default function CertCarousel({
 
   const [active, setActive] = useState(initial);
 
+  // Track the viewport width so the side-cards spread stays inside the screen
+  // on small phones instead of overflowing and creating a horizontal scrollbar.
+  const [viewport, setViewport] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
+
+  useEffect(() => {
+    const onResize = () => setViewport(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   if (!n) return null;
+
+  // How far the neighbouring cards are pushed sideways from the centre.
+  // Smaller on narrow screens so the faded side cards stay (mostly) on screen.
+  const spread = viewport < 420 ? 112 : viewport < 640 ? 140 : 190;
 
   // shortest signed distance around the ring
   const offset = (i: number) => {
@@ -51,8 +68,10 @@ export default function CertCarousel({
 
   return (
     <div className="select-none">
-      <div className="relative mx-auto h-[330px] w-full max-w-3xl" style={{ perspective: "1200px" }}>
-        {/* prev / next — pinned to the left & right sides, centred on the ring */}
+      <div className="relative mx-auto h-[330px] w-full max-w-3xl">
+        {/* prev / next — pinned to the left & right sides, centred on the ring.
+            Kept outside the overflow-clipped ring below so they can still sit
+            outside the cards on wide screens. */}
         <button
           type="button"
           onClick={() => go(-1)}
@@ -70,50 +89,55 @@ export default function CertCarousel({
           &gt;
         </button>
 
-        {items.map((c, i) => {
-          const d = offset(i);
-          const abs = Math.abs(d);
-          const hidden = abs > 2;
-          const img = imageFor(c);
-          return (
-            <button
-              key={c.name}
-              type="button"
-              onClick={() => setActive(i)}
-              aria-label={c.name}
-              aria-hidden={hidden}
-              tabIndex={hidden ? -1 : 0}
-              className="absolute left-1/2 top-1/2 rounded-[22px] transition-all duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              style={{
-                transform: `translate(-50%, -50%) translateX(${d * 190}px) scale(${1 - abs * 0.22})`,
-                opacity: hidden ? 0 : abs === 0 ? 1 : abs === 1 ? 0.45 : 0.18,
-                filter: abs === 0 ? "none" : `blur(${abs}px)`,
-                zIndex: 50 - abs,
-                pointerEvents: hidden ? "none" : "auto",
-                cursor: abs === 0 ? "default" : "pointer",
-              }}
-            >
-              <span
-                className={`block h-[260px] w-[260px] overflow-hidden rounded-[22px] border-2 bg-secondary shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ${
-                  abs === 0 ? "border-primary/70" : "border-border"
-                }`}
+        {/* The ring is overflow-clipped so the faded side cards never extend
+            beyond the viewport (no horizontal scrollbar / blank space on the
+            right) — they simply fade at the screen edges. */}
+        <div className="relative h-full w-full overflow-hidden" style={{ perspective: "1200px" }}>
+          {items.map((c, i) => {
+            const d = offset(i);
+            const abs = Math.abs(d);
+            const hidden = abs > 2;
+            const img = imageFor(c);
+            return (
+              <button
+                key={c.name}
+                type="button"
+                onClick={() => setActive(i)}
+                aria-label={c.name}
+                aria-hidden={hidden}
+                tabIndex={hidden ? -1 : 0}
+                className="absolute left-1/2 top-1/2 rounded-[22px] transition-all duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                style={{
+                  transform: `translate(-50%, -50%) translateX(${d * spread}px) scale(${1 - abs * 0.22})`,
+                  opacity: hidden ? 0 : abs === 0 ? 1 : abs === 1 ? 0.45 : 0.18,
+                  filter: abs === 0 ? "none" : `blur(${abs}px)`,
+                  zIndex: 50 - abs,
+                  pointerEvents: hidden ? "none" : "auto",
+                  cursor: abs === 0 ? "default" : "pointer",
+                }}
               >
-                {img ? (
-                  <img
-                    src={img}
-                    alt={`${c.name} certificate issued by ${c.issuer}`}
-                    loading="lazy"
-                    className="h-full w-full object-cover object-center"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center px-6 text-center font-mono text-xs text-muted-foreground">
-                    {c.issuer}
-                  </span>
-                )}
-              </span>
-            </button>
-          );
-        })}
+                <span
+                  className={`block h-[260px] w-[260px] overflow-hidden rounded-[22px] border-2 bg-secondary shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ${
+                    abs === 0 ? "border-primary/70" : "border-border"
+                  }`}
+                >
+                  {img ? (
+                    <img
+                      src={img}
+                      alt={`${c.name} certificate issued by ${c.issuer}`}
+                      loading="lazy"
+                      className="h-full w-full object-cover object-center"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center px-6 text-center font-mono text-xs text-muted-foreground">
+                      {c.issuer}
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* details of the front certificate */}

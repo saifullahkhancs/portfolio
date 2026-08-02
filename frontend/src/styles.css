@@ -71,6 +71,17 @@
     border-color: var(--color-border);
   }
 
+  /* Prevent any element wider than the viewport (animated packets, carousel
+     side-cards, fixed-width badges, marquees, etc.) from creating a horizontal
+     scrollbar and leaving blank space on the right on mobile. `clip` (rather
+     than `hidden`) does not create a scroll container, so `position: sticky`
+     headers and decks keep working. */
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
