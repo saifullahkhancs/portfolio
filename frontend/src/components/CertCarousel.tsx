@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Coverflow-style certificate carousel.
  *  - certificates are shown as square cards
  *  - the active one sits in the centre, fully opaque and largest
  *  - the neighbours sit left / right, smaller and faded
- *  - the most recently added certificate starts in front
+ *  - the first certificate (display/sort order) starts in front
  *  - < and > buttons rotate the ring
  */
 export default function CertCarousel({
@@ -17,21 +17,9 @@ export default function CertCarousel({
 }) {
   const n = items.length;
 
-  // "last added" = highest id if the API provides one, otherwise the last entry
-  const initial = useMemo(() => {
-    if (!n) return 0;
-    const withId = items.filter((c) => typeof c.id === "number");
-    if (withId.length === n) {
-      let best = 0;
-      items.forEach((c, i) => {
-        if (c.id > items[best].id) best = i;
-      });
-      return best;
-    }
-    return n - 1;
-  }, [items, n]);
-
-  const [active, setActive] = useState(initial);
+  // Start with the first certificate in the list (display/sort order),
+  // so the front card matches the leftmost dot (index 0).
+  const [active, setActive] = useState(0);
 
   // Track the viewport width so the side-cards spread stays inside the screen
   // on small phones instead of overflowing and creating a horizontal scrollbar.

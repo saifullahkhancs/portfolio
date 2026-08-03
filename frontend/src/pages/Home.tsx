@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { SiteShell } from "@/components/SiteShell";
 import { Reveal } from "@/components/Reveal";
 import { SkillBackdrop } from "@/components/SkillBackdrop";
-import { ProjectIcons } from "@/components/ProjectIcons";
 import { ToolStrips } from "@/components/ToolStrips";
 import { TiltCard } from "@/components/TiltCard";
+import ProjectCard from "@/components/ProjectCard";
 import IDCard from "@/components/IDCard";
 import HeroAnimation from "@/components/HeroAnimation";
 import CertCarousel from "@/components/CertCarousel";
@@ -223,12 +223,7 @@ export default function Home() {
           {projects.slice(0, 2).map((p: any, i: number) => (
             <Reveal key={p.name || i} delay={i * 110}>
               <TiltCard>
-                <article className="panel h-full p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/50 hover:shadow-[0_0_40px_-18px_var(--color-primary)]">
-                  <h3 className="text-lg font-semibold">{p.name}</h3>
-                  <p className="mt-1 font-mono text-xs text-primary">{p.tagline}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
-                  <ProjectIcons name={p.name} />
-                </article>
+                <ProjectCard p={p} />
               </TiltCard>
             </Reveal>
           ))}
