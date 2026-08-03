@@ -9,9 +9,10 @@ import { Film, Info } from "lucide-react";
  *  - Front: project name, tagline, description, stack and links.
  *  - Back : the project's demo video (flip the card to watch it).
  * Clicking or swiping flips the card.
+ * Pass `defaultFlipped` to start on the video side (used on the Home page).
  */
-export default function ProjectCard({ p }: { p: any }) {
-  const [isFlipped, setIsFlipped] = useState(false);
+export default function ProjectCard({ p, defaultFlipped = false }: { p: any; defaultFlipped?: boolean }) {
+  const [isFlipped, setIsFlipped] = useState(defaultFlipped);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
