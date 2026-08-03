@@ -59,13 +59,13 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
   };
 
   return (
-    <div ref={sectionRef} className="relative" style={{ height: `${Math.max(jobs.length, 2) * 110 + 40}vh` }}>
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden">
-        <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+    <div ref={sectionRef} className="relative" style={{ height: `${Math.max(jobs.length, 2) * 85 + 30}vh` }}>
+      <div className="sticky top-16 flex h-[calc(100vh-4rem)] flex-col items-center justify-start pt-6 sm:pt-10 md:pt-12 overflow-hidden">
+        <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           scroll — the deck rotates
         </p>
 
-        <div className="relative h-[min(540px,62vh)] w-[min(680px,92vw)]" style={{ perspective: "1200px" }}>
+        <div className="relative h-[min(560px,65vh)] w-[min(680px,92vw)]" style={{ perspective: "1200px" }}>
           {jobs.map((job: any, i: number) => {
             const d = i - active; // d < 0 already passed, d = 0 front, d > 0 waiting behind
             let transform: string;
@@ -119,7 +119,7 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
         </div>
 
         {/* prev / next controls + progress rail */}
-        <div className="mt-8 flex items-center gap-4">
+        <div className="mt-6 sm:mt-8 flex items-center gap-4">
           <button
             type="button"
             onClick={() => jumpTo(Math.max(0, safeCurrent - 1))}
@@ -154,7 +154,7 @@ function ExperienceDeck({ jobs }: { jobs: any[] }) {
             &gt;
           </button>
         </div>
-        <p className="mt-3 font-mono text-xs text-muted-foreground">
+        <p className="mt-2 sm:mt-3 font-mono text-xs text-muted-foreground">
           {(jobs[safeCurrent] as any)?.company || ""} — {safeCurrent + 1} of {jobs.length}
         </p>
       </div>
