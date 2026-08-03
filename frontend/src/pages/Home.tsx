@@ -223,7 +223,7 @@ export default function Home() {
           {projects.slice(0, 2).map((p: any, i: number) => (
             <Reveal key={p.name || i} delay={i * 110}>
               <TiltCard>
-                <ProjectCard p={p} />
+                <ProjectCard p={p} defaultFlipped />
               </TiltCard>
             </Reveal>
           ))}

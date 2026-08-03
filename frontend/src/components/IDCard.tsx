@@ -99,8 +99,8 @@ export default function IDCard({ profile }: Props) {
 
             <div className="space-y-2 bg-gradient-to-r from-[#f4f6fb] via-[#ede9fe] to-[#e0f2fe] bg-[length:200%_200%] animate-[gradient-shift_8s_ease_infinite] px-5 py-5">
               <div className="font-mono text-sm font-extrabold uppercase tracking-widest text-blue-700">ID {badgeId}</div>
-              <div className="font-mono text-xl font-bold text-zinc-900 break-words leading-snug">{p.phone || "—"}</div>
-              <div className="font-mono text-lg font-medium text-zinc-600 break-words leading-snug">{p.email || "—"}</div>
+              <div className="font-mono text-xl font-bold text-zinc-900 break-words leading-snug">{p.email || "—"}</div>
+              <div className="font-mono text-lg font-medium text-zinc-600 break-words leading-snug">{p.phone || "—"}</div>
             </div>
           </div>
         </div>
